@@ -1,0 +1,19 @@
+{% extends "layout/base.html" %}
+
+{% block meta_tags %}
+  <meta name="robots" content="noindex, nofollow">
+{% endblock %}
+
+{% block content %}
+  <div class="bg-background" style="min-height: 100vh; display: flex; align-items: center;">
+    <div class="container py-5">
+      <div class="card border-0 rounded-4 mx-auto p-5 shadow" style="max-width: 600px;">
+        <div class="row">
+          <div style="width: 500px; margin: 0 auto;">
+            {% block main %}{% endblock main %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

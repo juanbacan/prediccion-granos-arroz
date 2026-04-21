@@ -1,0 +1,59 @@
+
+.accordion {
+    padding-right: 0;
+    padding-left: 0;
+}
+
+.wrapper {
+    margin: 0 auto;
+    position: relative; /* Ensure absolute positioned child elements are relative to this*/
+}
+
+/* Absolute positioned wrapper for the element you want to fix position */
+.fixed-wrapper {
+    width: 220px;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+/* The element you want to fix the position of */
+.fixed {
+    width: 350px;
+    position: fixed;
+    height: 100%;
+    overflow-y: auto;
+    border-right: 1px solid #ccc;
+  
+    /* Do not set top / left! */
+}
+
+.fixed::-webkit-scrollbar {
+    width: 8px;
+    border-radius: 4px;
+    background-color: #ddd;
+}
+
+.fixed::-webkit-scrollbar-thumb {
+    background-color: #888;
+    border-radius: 4px;
+  }
+
+@media screen and (min-width: 480px) {
+    #main {
+        margin-left: 350px;
+    }
+}
+@media screen and (min-width: 480px) {
+    #main-content {
+        padding-left: 2rem;
+        padding-right: 2rem;
+        padding-top: 1.3rem;
+    }
+}
+@media screen and (max-width: 480px) {
+    .fixed-wrapper {
+        display: none;
+    }
+}
+

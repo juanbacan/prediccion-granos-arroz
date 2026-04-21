@@ -1,0 +1,21 @@
+// 
+// backgrounds.scss
+//
+
+
+@each $color, $value in $theme-colors {
+    .bg-#{$color} {
+        &.bg-soft{
+            background-color: rgba(($value), 0.25) !important;
+        }
+        &.bg-soft-sm{
+            background-color: rgba(($value), 0.05) !important;
+        }
+        &.bg-soft-md{
+            background-color: rgba(($value), 0.15) !important;
+        }
+        &.bg-soft-lg{
+            background-color: rgba(($value), 0.35) !important;
+        }
+    }
+}

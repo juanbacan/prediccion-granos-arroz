@@ -1,0 +1,225 @@
+{% extends 'layout/base_admin.html' %}
+{% load static %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item" aria-current="page">{{ agrupacion_activa.nombre }}</li>
+    <li class="breadcrumb-item"><a href="{% url 'administracion' %}{{ modulo_activo.url }}">{{ modulo_activo.nombre }}</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Optimizar receta</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <form method="POST" id="mainForm" action="{{ request.get_full_path }}" class="opt-form" novalidate>
+            {% csrf_token %}
+            <input type="hidden" name="action" value="add" />
+
+            <div class="callout callout-info opt-callout">
+                <h5 class="mb-1"><i class="fas fa-sliders-h mr-1"></i> Optimizador de receta</h5>
+                <p class="mb-0 small">Fija condiciones del lote y objetivos, luego el sistema buscará automáticamente la mejor combinación de tiempo y temperatura.</p>
+            </div>
+
+            <div class="card card-outline card-primary opt-card">
+                <div class="card-header"><h3 class="card-title">Condiciones iniciales</h3></div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 col-lg-4">
+                            <label class="form-label" for="{{ form.entrenamiento.id_for_label }}">{{ form.entrenamiento.label }}</label>
+                            {% include 'core/forms/fieldRender.html' with field=form.entrenamiento %}
+                        </div>
+                        <div class="col-md-6 col-lg-4">
+                            <label class="form-label" for="{{ form.tipo_grano.id_for_label }}">{{ form.tipo_grano.label }}</label>
+                            {% include 'core/forms/fieldRender.html' with field=form.tipo_grano %}
+                        </div>
+                        <div class="col-md-6 col-lg-2">
+                            <label class="form-label" for="{{ form.humedad_mp.id_for_label }}">{{ form.humedad_mp.label }}</label>
+                            {% include 'core/forms/fieldRender.html' with field=form.humedad_mp %}
+                        </div>
+                        <div class="col-md-6 col-lg-2">
+                            <label class="form-label" for="{{ form.blancura_mp.id_for_label }}">{{ form.blancura_mp.label }}</label>
+                            {% include 'core/forms/fieldRender.html' with field=form.blancura_mp %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card card-outline card-success opt-card mt-3">
+                <div class="card-header"><h3 class="card-title">Objetivo</h3></div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 col-lg-3">
+                            <label class="form-label" for="{{ form.objetivo_humedad_pt.id_for_label }}">{{ form.objetivo_humedad_pt.label }}</label>
+                            {% include 'core/forms/fieldRender.html' with field=form.objetivo_humedad_pt %}
+                        </div>
+                        <div class="col-md-6 col-lg-3">
+                            <label class="form-label" for="{{ form.objetivo_blancura_pt.id_for_label }}">{{ form.objetivo_blancura_pt.label }}</label>
+                            {% include 'core/forms/fieldRender.html' with field=form.objetivo_blancura_pt %}
+                        </div>
+                        <div class="col-md-6 col-lg-3">
+                            <label class="form-label" for="{{ form.iteraciones.id_for_label }}">{{ form.iteraciones.label }}</label>
+                            {% include 'core/forms/fieldRender.html' with field=form.iteraciones %}
+                        </div>
+                        <div class="col-md-6 col-lg-3">
+                            <label class="form-label" for="{{ form.decimales.id_for_label }}">{{ form.decimales.label }}</label>
+                            {% include 'core/forms/fieldRender.html' with field=form.decimales %}
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-md-12">
+                            <div class="form-check opt-check">
+                                {{ form.forzar_no_negativo }}
+                                <label class="form-check-label" for="{{ form.forzar_no_negativo.id_for_label }}">{{ form.forzar_no_negativo.label }}</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card card-outline card-warning opt-card mt-3">
+                <div class="card-header"><h3 class="card-title">Rangos de búsqueda</h3></div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 col-lg-3">
+                            <label class="form-label" for="{{ form.t_desh_min.id_for_label }}">{{ form.t_desh_min.label }}</label>
+                            {% include 'core/forms/fieldRender.html' with field=form.t_desh_min %}
+                        </div>
+                        <div class="col-md-6 col-lg-3">
+                            <label class="form-label" for="{{ form.t_desh_max.id_for_label }}">{{ form.t_desh_max.label }}</label>
+                            {% include 'core/forms/fieldRender.html' with field=form.t_desh_max %}
+                        </div>
+                        <div class="col-md-6 col-lg-3">
+                            <label class="form-label" for="{{ form.temp_desh_min.id_for_label }}">{{ form.temp_desh_min.label }}</label>
+                            {% include 'core/forms/fieldRender.html' with field=form.temp_desh_min %}
+                        </div>
+                        <div class="col-md-6 col-lg-3">
+                            <label class="form-label" for="{{ form.temp_desh_max.id_for_label }}">{{ form.temp_desh_max.label }}</label>
+                            {% include 'core/forms/fieldRender.html' with field=form.temp_desh_max %}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 col-lg-3">
+                            <label class="form-label" for="{{ form.t_col_min.id_for_label }}">{{ form.t_col_min.label }}</label>
+                            {% include 'core/forms/fieldRender.html' with field=form.t_col_min %}
+                        </div>
+                        <div class="col-md-6 col-lg-3">
+                            <label class="form-label" for="{{ form.t_col_max.id_for_label }}">{{ form.t_col_max.label }}</label>
+                            {% include 'core/forms/fieldRender.html' with field=form.t_col_max %}
+                        </div>
+                        <div class="col-md-6 col-lg-3">
+                            <label class="form-label" for="{{ form.temp_col_min.id_for_label }}">{{ form.temp_col_min.label }}</label>
+                            {% include 'core/forms/fieldRender.html' with field=form.temp_col_min %}
+                        </div>
+                        <div class="col-md-6 col-lg-3">
+                            <label class="form-label" for="{{ form.temp_col_max.id_for_label }}">{{ form.temp_col_max.label }}</label>
+                            {% include 'core/forms/fieldRender.html' with field=form.temp_col_max %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="opt-actions mt-4 pt-3 border-top d-flex gap-2 flex-wrap">
+                <input type="submit" class="btn btn-primary" value="Optimizar receta" name="_save" />
+                <button type="button" id="btn-limpiar-opt" class="btn btn-outline-secondary">Limpiar</button>
+            </div>
+
+            <div id="opt-result" class="card card-outline card-success opt-card mt-3 d-none" aria-live="polite">
+                <div class="card-header"><h3 class="card-title">Receta recomendada</h3></div>
+                <div class="card-body">
+                    <div class="row g-2">
+                        <div class="col-md-6 col-lg-3"><div class="opt-kpi"><small>Tiempo deshidratación</small><strong id="res-t-desh">-</strong></div></div>
+                        <div class="col-md-6 col-lg-3"><div class="opt-kpi"><small>Temp. deshidratación</small><strong id="res-temp-desh">-</strong></div></div>
+                        <div class="col-md-6 col-lg-3"><div class="opt-kpi"><small>Tiempo coloración</small><strong id="res-t-col">-</strong></div></div>
+                        <div class="col-md-6 col-lg-3"><div class="opt-kpi"><small>Temp. coloración</small><strong id="res-temp-col">-</strong></div></div>
+                    </div>
+                    <hr>
+                    <div class="row g-2">
+                        <div class="col-md-6 col-lg-3"><div class="opt-kpi"><small>Pred. Humedad PT</small><strong id="res-ph">-</strong></div></div>
+                        <div class="col-md-6 col-lg-3"><div class="opt-kpi"><small>Pred. Blancura PT</small><strong id="res-pb">-</strong></div></div>
+                        <div class="col-md-6 col-lg-3"><div class="opt-kpi"><small>Desviación Humedad</small><strong id="res-eh">-</strong></div></div>
+                        <div class="col-md-6 col-lg-3"><div class="opt-kpi"><small>Desviación Blancura</small><strong id="res-eb">-</strong></div></div>
+                    </div>
+                    <small id="res-meta" class="text-muted d-block mt-2"></small>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extracss %}
+    {% include 'core/forms/form_css.html' %}
+    <style>
+        .opt-callout { background: linear-gradient(90deg,#dff3f8 0%,#eef9fc 100%); border-left-color: #17a2b8; border-radius: 6px; }
+        .opt-card { border-radius: 8px; box-shadow: 0 1px 3px rgba(14,30,37,0.08); }
+        .opt-form .form-label { font-weight: 600; font-size: .82rem; margin-bottom: .35rem; }
+        .opt-form .form-control, .opt-form .form-select { border-color: #ced7e2; }
+        .opt-form .form-control:focus, .opt-form .form-select:focus { border-color: #5b91c8; box-shadow: 0 0 0 .13rem rgba(63,103,145,.18); }
+        .opt-actions { background: #fbfcfd; border: 1px solid #e7edf3; border-radius: 6px; padding: .8rem; }
+        .opt-kpi { background: #f7fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: .65rem .75rem; min-height: 78px; display: flex; flex-direction: column; justify-content: center; }
+        .opt-kpi small { color: #5a6c81; font-size: .7rem; text-transform: uppercase; font-weight: 700; }
+        .opt-kpi strong { color: #1f2f44; font-size: 1.15rem; margin-top: .12rem; }
+        .opt-check { background: #f8f9fa; border: 1px solid #e5e9ef; border-radius: 6px; padding: .75rem .9rem; }
+    </style>
+{% endblock %}
+
+{% block extrajs %}
+    {% include 'core/forms/form_js.html' %}
+    <script>
+        (function () {
+            function fillResult(data) {
+                document.getElementById('res-t-desh').textContent = data.tiempo_deshidratacion;
+                document.getElementById('res-temp-desh').textContent = data.temp_deshidratacion;
+                document.getElementById('res-t-col').textContent = data.tiempo_coloracion;
+                document.getElementById('res-temp-col').textContent = data.temp_coloracion;
+                document.getElementById('res-ph').textContent = data.pred_humedad_pt;
+                document.getElementById('res-pb').textContent = data.pred_blancura_pt;
+                document.getElementById('res-eh').textContent = data.desviacion_humedad;
+                document.getElementById('res-eb').textContent = data.desviacion_blancura;
+                document.getElementById('res-meta').textContent = 'Iteraciones: ' + data.iteraciones + (data.tipo_grano ? (' | Tipo: ' + data.tipo_grano) : '');
+                document.getElementById('opt-result').classList.remove('d-none');
+                document.getElementById('opt-result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
+            function clearForm() {
+                var form = document.getElementById('mainForm');
+                if (!form) return;
+                [
+                    'tipo_grano', 'humedad_mp', 'blancura_mp',
+                    'objetivo_humedad_pt', 'objetivo_blancura_pt',
+                    't_desh_min', 't_desh_max', 'temp_desh_min', 'temp_desh_max',
+                    't_col_min', 't_col_max', 'temp_col_min', 'temp_col_max'
+                ].forEach(function (name) {
+                    var el = form.querySelector('[name="' + name + '"]');
+                    if (!el) return;
+                    if (el.tagName === 'SELECT') {
+                        el.selectedIndex = 0;
+                    } else {
+                        el.value = '';
+                    }
+                    el.dispatchEvent(new Event('change', { bubbles: true }));
+                });
+                form.classList.remove('was-validated');
+                var result = document.getElementById('opt-result');
+                if (result) result.classList.add('d-none');
+            }
+
+            document.addEventListener('DOMContentLoaded', function () {
+                var form = document.getElementById('mainForm');
+                var clearBtn = document.getElementById('btn-limpiar-opt');
+                if (clearBtn) {
+                    clearBtn.addEventListener('click', clearForm);
+                }
+                if (!form) return;
+
+                form.addEventListener('submit', async function (event) {
+                    event.preventDefault();
+                    event.stopImmediatePropagation();
+                    var resp = await submitModalForm1('mainForm');
+                    if (resp && resp.result === 'ok' && resp.resp) {
+                        fillResult(resp.resp);
+                    }
+                }, true);
+            });
+        })();
+    </script>
+{% endblock %}

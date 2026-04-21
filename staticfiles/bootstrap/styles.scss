@@ -1,0 +1,155 @@
+@import "../../node_modules/bootstrap/scss/functions";
+@import "../../node_modules/bootstrap/scss/variables";
+@import "../../node_modules/bootstrap/scss/mixins";
+
+
+
+$primary: #002b5c;
+$secondary: #f4d35e;
+$success: #1e7e34;
+$info: #5b8db8;
+$warning: #e6b800;
+$danger: #c8102e;
+$light: #f8fafc;
+$dark: #1a1a2e;
+
+$theme-colors: (
+    "primary": $primary,
+    "secondary": $secondary,
+    "success": $success,
+    "info": $info,
+    "warning": $warning,
+    "danger": $danger,
+    "light": $light,
+    "dark": $dark,
+
+);
+
+
+$theme-colors: (
+    "primary": $primary,
+    "secondary": $secondary,
+    "success": $success,
+    "info": $info,
+    "warning": $warning,
+    "danger": $danger,
+    "light": $light,
+    "dark": $dark,
+);
+
+
+$min-contrast-ratio:   1.8;
+// Botones
+$btn-font-weight: 700;
+$btn-border-radius: 0.5rem;
+$btn-font-size: 1rem;
+$btn-padding-x: 0.9rem;
+
+$btn-border-radius-sm: 0.5rem;
+$btn-padding-x-sm: 0.5rem;
+
+
+$h1-font-size: $font-size-base * 1.75;
+$h2-font-size: $font-size-base * 1.55;
+$h3-font-size: $font-size-base * 1.35;
+$h4-font-size: $font-size-base * 1.15;
+$h5-font-size: $font-size-base * 1;
+$h6-font-size: $font-size-base * 0.9;
+
+// $input-btn-padding-y: .225rem;
+// $input-btn-font-size: 1rem;
+
+// $input-btn-padding-y-sm: .225rem;
+// $input-btn-font-size-sm: 0.8rem;
+
+// $input-btn-padding-y-lg: .225rem;
+// $input-btn-font-size-lg: 1.2rem;
+
+// $btn-padding-y:               $input-btn-padding-y;
+// $btn-padding-x:               $input-btn-padding-x;
+// $btn-font-family:             $input-btn-font-family;
+// $btn-font-size:               $input-btn-font-size;
+// $btn-line-height:             $input-btn-line-height;
+// $btn-white-space:             null; // Set to `nowrap` to prevent text wrapping
+
+// $btn-padding-y-sm:            $input-btn-padding-y-sm;
+// $btn-padding-x-sm:            $input-btn-padding-x-sm;
+// $btn-font-size-sm:            $input-btn-font-size-sm;
+
+// $btn-padding-y-lg:            $input-btn-padding-y-lg;
+// $btn-padding-x-lg:            $input-btn-padding-x-lg;
+// $btn-font-size-lg:            $input-btn-font-size-lg;
+
+
+
+// $input-padding-y: 0.275rem;
+// $input-padding-x: 0.75rem;
+
+// $input-font-size: $input-btn-font-size * 0.8;
+// $input-focus-box-shadow: 0 0 0 0.15rem rgba($primary, 0.25);
+// $input-btn-focus-border-color: $primary;
+// $input-focus-border-color: rgba($input-btn-focus-border-color, 0.25);
+
+// $form-label-font-size: 0.8rem;
+// $form-label-width: 112px;
+
+// label {
+//     width: 112px;
+//     display: inline-block;
+//     text-align: right;
+//     margin-right: 15px;
+//     font-size: 0.8em;
+//     line-height: 1;
+// }
+
+// $form-select-font-size:             $input-font-size;
+// $form-select-padding-y:             $input-padding-y;
+// $form-select-padding-x:             $input-padding-x;
+
+
+// $form-select-focus-border-color:  $input-focus-border-color;
+// $form-select-focus-width:         $input-focus-width;
+// $form-select-border-color:        $input-border-color;
+// $form-select-color:                 $input-color;
+// $form-select-focus-box-shadow:    0 0 0 0.15rem rgba($primary, 0.25);
+
+@import "../../node_modules/bootstrap/scss/bootstrap.scss";
+@import "backgrounds";
+
+.bg-background {
+    background-color: #EFF5F9;
+}
+
+.bg-lightgray {
+    background-color: #e5e5e5;
+}
+
+.bg-pastel {
+    background-color: #EFF5F9;
+}
+
+h1 {
+    font-weight: bold;
+}
+h2 {
+    font-weight: 800;
+}
+h3 {
+    font-weight: 600;
+}
+h4 {
+    font-weight: bold;
+}
+h5 {
+    font-weight: bold;
+}
+h6 {
+    font-weight: bold;
+}
+
+.bg-soft {
+    background-color: #d9ecff!important;
+}
+
+
+

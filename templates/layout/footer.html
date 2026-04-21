@@ -1,0 +1,88 @@
+{% load static %}
+<div class="bg-primary text-white">
+    <div class="container py-5">
+        <div class="row gy-4">
+            <div class="col-md-6">
+                <div class="d-flex align-items-start gap-3">
+                    {% if application.logo_horizontal_negativo %}
+                        <img src="{{ application.logo_horizontal_negativo.url }}" alt="{{ application.titulo_sitio }}" width="160">
+                    {% endif %}
+                    <div class="small text-white mt-3">{{ application.meta_description }}</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="row gy-4">
+                    <div class="col-md-6">
+                        <h3 class="h5 fw-bold">Nosotros</h3>
+                        <div class="row">
+                            <a class="link align-items-center d-flex gap-1" aria-current="page" href="{{ application.url_safe }}{% url 'django.contrib.flatpages.views.flatpage' 'politicas-y-privacidad/' %}">
+                                <i class="fa-solid fa-file-contract"></i> Políticas de Privacidad
+                            </a>
+                            <a class="link align-items-center d-flex gap-1" aria-current="page" href="{{ application.url_safe }}{% url 'django.contrib.flatpages.views.flatpage' 'terminos-y-condiciones/' %}">
+                                <i class="fa-solid fa-user-secret"></i> Términos y Condiciones
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h3 class="h5 fw-bold">Categorias</h3>
+                        <div class="row">
+                            {% for categoria in categorias_menu %}
+                                <a class="link align-items-center d-flex gap-1" aria-current="page" href="{% url 'preguntas_por_categoria' categoria.alias %}">
+                                    {{ categoria.nombre }}
+                                </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="row mt-5">
+            <hr class="bg-white">
+            <div class="d-flex flex-wrap justify-content-center gap-4 mt-3 text-white">
+                {% if application.facebook %}
+                    <a href="{{ application.facebook }}" title="Facebook" target="_blank" class="link">
+                        <div style="width: 50px; height: 50px; border: 2px solid white; border-radius: 50%; display: flex; justify-content: center; align-items: center;">
+                            <i style="font-size: 1.5em;" class="fa-brands fa-facebook-f"></i>
+                        </div>
+                    </a>
+                {% endif %}
+                {% if application.instagram %}
+                    <a href="{{ application.instagram }}" title="Instagram" target="_blank" class="link">
+                        <div style="width: 50px; height: 50px; border: 2px solid white; border-radius: 50%; display: flex; justify-content: center; align-items: center;">
+                            <i style="font-size: 1.5em;" class="fab fa-instagram fa-lg"></i>
+                        </div>
+                    </a>
+                {% endif %}
+                {% if application.celular_contacto %}
+                    <a href="https://wa.me/{{ application.celular_contacto }}" title="WhatsApp" target="_blank" class="link"> 
+                        <div style="width: 50px; height: 50px; border: 2px solid white; border-radius: 50%; display: flex; justify-content: center; align-items: center;">
+                            <i style="font-size: 1.5em;" class="fa-brands fa-whatsapp fa-lg"></i>
+                        </div>
+                    </a>
+                {% endif %}
+                {% if application.tiktok %}
+                    <a href="{{ application.tiktok }}" title="Tiktok" target="_blank" class="link">
+                        <div style="width: 50px; height: 50px; border: 2px solid white; border-radius: 50%; display: flex; justify-content: center; align-items: center;">
+                            <i style="font-size: 1.5em;" class="fab fa-tiktok fa-lg"></i>
+                        </div>
+                    </a>
+                {% endif %}
+                {% if application.youtube %}
+                    <a href="{{ application.youtube }}" title="Youtube" target="_blank" class="link">
+                        <div style="width: 50px; height: 50px; border: 2px solid white; border-radius: 50%; display: flex; justify-content: center; align-items: center;">
+                            <i style="font-size: 1.5em;" class="fab fa-youtube fa-lg"></i>
+                        </div>
+                    </a>
+                {% endif %}
+                {% if application.linkedin %}
+                    <a href="{{ application.linkedin }}" title="Linkedin" target="_blank" class="link">
+                        <div style="width: 50px; height: 50px; border: 2px solid white; border-radius: 50%; display: flex; justify-content: center; align-items: center;">
+                            <i style="font-size: 1.5em;" class="fab fa-linkedin fa-lg"></i>
+                        </div>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>

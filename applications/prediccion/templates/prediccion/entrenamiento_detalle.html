@@ -1,0 +1,252 @@
+{% extends 'layout/base_admin.html' %}
+{% load static %}
+
+{% block title %}
+  <div class="col-sm-6">
+    <h1 class="mb-0 h3">
+      <i class="fa fa-chart-line"></i> Detalle del Entrenamiento
+    </h1>
+  </div>
+{% endblock %}
+
+{% block breadcrumb %}
+  <li class="breadcrumb-item"><a href="{% url 'admin_entrenamientos' %}">Entrenamientos</a></li>
+  <li class="breadcrumb-item active" aria-current="page">Detalle #{{ entrenamiento.id }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">
+          <i class="fa fa-info-circle"></i> {{ entrenamiento.nombre }}
+        </h3>
+        <div class="card-tools">
+          {% if entrenamiento.estado == 'DONE' %}
+            <span class="badge bg-success"><i class="fa fa-check"></i> Completado</span>
+          {% elif entrenamiento.estado == 'RUNNING' %}
+            <span class="badge bg-info"><i class="fa fa-spinner fa-spin"></i> En Proceso</span>
+          {% elif entrenamiento.estado == 'FAILED' %}
+            <span class="badge bg-danger"><i class="fa fa-times"></i> Falló</span>
+          {% elif entrenamiento.estado == 'PENDING' %}
+            <span class="badge bg-warning"><i class="fa fa-clock"></i> Pendiente</span>
+          {% endif %}
+        </div>
+      </div>
+      <div class="card-body">
+        <!-- Información General -->
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <p><strong>Dataset:</strong> {{ entrenamiento.dataset.nombre }}</p>
+            <p><strong>Iniciado:</strong> {{ entrenamiento.iniciado_en|date:"d/m/Y H:i:s"|default:"—" }}</p>
+            <p><strong>Finalizado:</strong> {{ entrenamiento.finalizado_en|date:"d/m/Y H:i:s"|default:"—" }}</p>
+          </div>
+          <div class="col-md-6">
+            {% if entrenamiento.iniciado_en and entrenamiento.finalizado_en %}
+              {% with duracion=entrenamiento.finalizado_en|timeuntil:entrenamiento.iniciado_en %}
+                <p><strong>Duración:</strong> {{ duracion }}</p>
+              {% endwith %}
+            {% endif %}
+          </div>
+        </div>
+
+        <hr>
+
+        {% if entrenamiento.estado == 'DONE' %}
+          <!-- Métricas Humedad -->
+          <h4 class="mt-4"><i class="fa fa-chart-bar"></i> Resultados Humedad</h4>
+          <div class="row">
+            <div class="col-md-4">
+              <div class="info-box">
+                <span class="info-box-icon bg-info"><i class="fa fa-calculator"></i></span>
+                <div class="info-box-content">
+                  <span class="info-box-text">MSE (Humedad)</span>
+                  <span class="info-box-number">{{ entrenamiento.y1_mse|floatformat:6|default:"—" }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="info-box">
+                <span class="info-box-icon bg-primary"><i class="fa fa-square-root-alt"></i></span>
+                <div class="info-box-content">
+                  <span class="info-box-text">RMSE (Humedad)</span>
+                  <span class="info-box-number">{{ entrenamiento.y1_rmse|floatformat:6|default:"—" }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="info-box">
+                <span class="info-box-icon bg-success"><i class="fa fa-chart-line"></i></span>
+                <div class="info-box-content">
+                  <span class="info-box-text">R² (Humedad)</span>
+                  <span class="info-box-number">{{ entrenamiento.y1_r2|floatformat:6|default:"—" }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {% if entrenamiento.grafico_y1 %}
+            <div class="row mt-3">
+              <div class="col-12">
+                <div class="card">
+                  <div class="card-header">
+                    <h5 class="card-title"><i class="fa fa-image"></i> Gráfico Real vs Estimado (Humedad)</h5>
+                  </div>
+                  <div class="card-body text-center">
+                    <img src="{{ entrenamiento.grafico_y1.url }}" alt="Gráfico Humedad" class="img-fluid" style="max-width: 600px;">
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% endif %}
+
+          <hr class="my-4">
+
+          <!-- Métricas Blancura -->
+          <h4 class="mt-4"><i class="fa fa-chart-bar"></i> Resultados Blancura</h4>
+          <div class="row">
+            <div class="col-md-4">
+              <div class="info-box">
+                <span class="info-box-icon bg-info"><i class="fa fa-calculator"></i></span>
+                <div class="info-box-content">
+                  <span class="info-box-text">MSE (Blancura)</span>
+                  <span class="info-box-number">{{ entrenamiento.y2_mse|floatformat:6|default:"—" }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="info-box">
+                <span class="info-box-icon bg-primary"><i class="fa fa-square-root-alt"></i></span>
+                <div class="info-box-content">
+                  <span class="info-box-text">RMSE (Blancura)</span>
+                  <span class="info-box-number">{{ entrenamiento.y2_rmse|floatformat:6|default:"—" }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="info-box">
+                <span class="info-box-icon bg-success"><i class="fa fa-chart-line"></i></span>
+                <div class="info-box-content">
+                  <span class="info-box-text">R² (Blancura)</span>
+                  <span class="info-box-number">{{ entrenamiento.y2_r2|floatformat:6|default:"—" }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {% if entrenamiento.grafico_y2 %}
+            <div class="row mt-3">
+              <div class="col-12">
+                <div class="card">
+                  <div class="card-header">
+                    <h5 class="card-title"><i class="fa fa-image"></i> Gráfico Real vs Estimado (Blancura)</h5>
+                  </div>
+                  <div class="card-body text-center">
+                    <img src="{{ entrenamiento.grafico_y2.url }}" alt="Gráfico Blancura" class="img-fluid" style="max-width: 600px;">
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% endif %}
+
+          <!-- Descargar Artefactos -->
+          <hr class="my-4">
+          <h4 class="mt-4"><i class="fa fa-download"></i> Artefactos</h4>
+          <div class="row">
+            <div class="col-md-6">
+              <ul class="list-group">
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <span><i class="fa fa-file"></i> Modelo Humedad (.h5/.pkl)</span>
+                  {% if entrenamiento.modelo_y1_file %}
+                    <a href="{{ entrenamiento.modelo_y1_file.url }}" class="btn btn-sm btn-primary" download>
+                      <i class="fa fa-download"></i> Descargar
+                    </a>
+                  {% else %}
+                    <span class="text-muted">—</span>
+                  {% endif %}
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <span><i class="fa fa-file"></i> Scaler Humedad (.pkl)</span>
+                  {% if entrenamiento.scaler_y1_file %}
+                    <a href="{{ entrenamiento.scaler_y1_file.url }}" class="btn btn-sm btn-primary" download>
+                      <i class="fa fa-download"></i> Descargar
+                    </a>
+                  {% else %}
+                    <span class="text-muted">—</span>
+                  {% endif %}
+                </li>
+              </ul>
+            </div>
+            <div class="col-md-6">
+              <ul class="list-group">
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <span><i class="fa fa-file"></i> Modelo Blancura (.h5/.pkl)</span>
+                  {% if entrenamiento.modelo_y2_file %}
+                    <a href="{{ entrenamiento.modelo_y2_file.url }}" class="btn btn-sm btn-primary" download>
+                      <i class="fa fa-download"></i> Descargar
+                    </a>
+                  {% else %}
+                    <span class="text-muted">—</span>
+                  {% endif %}
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <span><i class="fa fa-file"></i> Scaler Blancura (.pkl)</span>
+                  {% if entrenamiento.scaler_y2_file %}
+                    <a href="{{ entrenamiento.scaler_y2_file.url }}" class="btn btn-sm btn-primary" download>
+                      <i class="fa fa-download"></i> Descargar
+                    </a>
+                  {% else %}
+                    <span class="text-muted">—</span>
+                  {% endif %}
+                </li>
+              </ul>
+            </div>
+          </div>
+
+        {% elif entrenamiento.estado == 'FAILED' %}
+          <!-- Errores -->
+          <div class="alert alert-danger" role="alert">
+            <h4 class="alert-heading"><i class="fa fa-exclamation-triangle"></i> El entrenamiento ha fallado</h4>
+            <hr>
+            <pre class="mb-0" style="white-space: pre-wrap; font-size: 0.9em;">{{ entrenamiento.resumen|default:"No se registraron detalles del error." }}</pre>
+          </div>
+
+        {% elif entrenamiento.estado == 'RUNNING' %}
+          <!-- En Proceso -->
+          <div class="alert alert-info" role="alert">
+            <h4 class="alert-heading"><i class="fa fa-spinner fa-spin"></i> Entrenamiento en proceso</h4>
+            <p>El entrenamiento está en ejecución. Por favor, recarga esta página en unos momentos para ver los resultados.</p>
+          </div>
+
+        {% elif entrenamiento.estado == 'PENDING' %}
+          <!-- Pendiente -->
+          <div class="alert alert-warning" role="alert">
+            <h4 class="alert-heading"><i class="fa fa-clock"></i> Entrenamiento pendiente</h4>
+            <p>Este entrenamiento aún no ha iniciado.</p>
+          </div>
+        {% endif %}
+
+        <!-- Resumen/Log (si hay) -->
+        {% if entrenamiento.resumen and entrenamiento.estado == 'DONE' %}
+          <hr class="my-4">
+          <h4 class="mt-4"><i class="fa fa-file-alt"></i> Resumen</h4>
+          <div class="card">
+            <div class="card-body">
+              <pre style="white-space: pre-wrap; font-size: 0.9em;">{{ entrenamiento.resumen }}</pre>
+            </div>
+          </div>
+        {% endif %}
+
+        <!-- Botón volver -->
+        <div class="mt-4">
+          <a href="{% url 'admin_entrenamientos' %}" class="btn btn-secondary">
+            <i class="fa fa-arrow-left"></i> Volver a la lista
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

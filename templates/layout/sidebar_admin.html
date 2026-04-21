@@ -1,0 +1,52 @@
+<aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
+  <div class="sidebar-brand">
+    <a href="{% url 'administracion' %}" class="brand-link">
+      {% if application.logo_horizontal_negativo %}
+        <img
+          src="{{ application.logo_horizontal_negativo.url }}"
+          alt="{{ application.titulo_sitio }}"
+          class="brand-image opacity-75 shadow"
+        />
+      {% else %}
+        <span class="brand-text fw-light">{{ application.titulo_sitio }}</span>
+      {% endif %}
+    </a>
+  </div>
+  <!--end::Sidebar Brand-->
+  <!--begin::Sidebar Wrapper-->
+  <div class="sidebar-wrapper">
+    <nav class="mt-2">
+      <!--begin::Sidebar Menu-->
+      <ul
+        class="nav sidebar-menu flex-column"
+        data-lte-toggle="treeview"
+        role="menu"
+        data-accordion="false"
+      >
+        {% for a in agrupacion_modulos %}
+          <li class="nav-item {% if a.activo %}menu-open{% endif %}">
+            <a href="#" class="nav-link active">
+              <i class="nav-icon {% if a.icono %}{{ a.icono }}{% else %}fa fa-rocket{% endif %}"></i>
+              <p>
+                {{ a.nombre }}
+                <i class="nav-arrow fa-solid fa-chevron-right"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              {% for m in a.modulos_activos %}
+                <li class="nav-item">
+                  <a href="{% url 'administracion' %}{{ m.url }}" class="nav-link {% if m.url in request.path %}active{% endif %}">
+                    <i class="nav-icon far fa-2xs fa-circle"></i>
+                    <p>{{ m.nombre }}</p>
+                  </a>
+                </li>
+              {% endfor %}
+            </ul>
+          </li>
+        {% endfor %}
+      </ul>
+      <!--end::Sidebar Menu-->
+    </nav>
+  </div>
+  <!--end::Sidebar Wrapper-->
+</aside>

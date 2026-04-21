@@ -1,0 +1,112 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        {% include 'layout/base_head.html' %}
+        <link rel="stylesheet" type="text/css" href="{% static 'assets/css/sidebar_perfil.css' %}"> 
+        {% comment %} <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/simplelightbox/2.14.2/simple-lightbox.min.css" integrity="sha512-FaAQujRxLMvw+BkmGN3w7u9EdQQr1t0vQoY8KDh09+6SFaWSTe+KrT8oCWg25X91hytm5c5BTmiSGQejkraaZg==" crossorigin="anonymous" referrerpolicy="no-referrer" /> {% endcomment %}
+    
+        {% block extracss %}{% endblock extracss %}
+        {% block modalcss %}{% endblock modalcss %}
+    </head>
+
+    <body class="bg-background">
+        {% comment %} {% webpush_button with_class="btn btn-primary" %} {% endcomment %}
+
+        {% comment %} *********** Loading ************ {% endcomment %}
+        <div class="preloader-static" id="loading-static">
+            <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+        </div>
+        {% comment %} ******************************** {% endcomment %}
+
+        {% comment %} ******************* Toast Message ******************* {% endcomment %} 
+        {% comment %} <div class="toast-container position-fixed bottom-0 end-0 p-3">
+            <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+              <div class="toast-header">
+                <img src="..." class="rounded me-2" alt="...">
+                <strong class="me-auto">Bootstrap</strong>
+                <small>11 mins ago</small>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+              </div>
+              <div class="toast-body">
+                Hello, world! This is a toast message.
+              </div>
+            </div>
+        </div> {% endcomment %}
+
+        {% comment %} *********** Error Message ************ {% endcomment %}
+        <div class="preloader-static" id="error-static">
+            <div class="card" style="width: 400px">
+                <div class="card-header d-flex justify-content-between">
+                    <h5 id="error-title">Error</h5>
+                    <button type="button" class="btn-close" onclick="hideErrorMessage()"></button>
+                </div>
+                <div class="card-body">
+                    <div id="error-message"></div>
+                    <div class="d-flex justify-content-end">
+                        <button type="button" class="btn btn-primary mt-3" onclick="hideErrorMessage()">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% comment %} ******************************** {% endcomment %}
+
+        <nav class="navbar fixed-top navbar-expand-md bg-light">
+        {% comment %} <nav class="navbar navbar-expand-md bg-light"> {% endcomment %}
+            <div class="container-fluid">
+
+                <button id="btn-change-sidebar" class="btn " onclick="changeNav()"><i class="fa-solid fa-xl fa-bars"></i></button>
+                <a title="Inicio" class="navbar-brand h6 mb-0 d-flex align-items-center gap-2" href="/">
+                    <img src="{% if application.logo %}{{ application.logo.url  }}{% endif %}" alt="Volver" height="30px">
+                </a>
+                {% include 'layout/header.html' %}
+            </div>
+        </nav>
+
+        {% comment %} Modal para Edición de formularios {% endcomment %}
+        <div class="modal fade" tabindex="-1" aria-labelledby="ModalEdicion" aria-hidden="true" id="modalEdicion"></div>
+
+        {% comment %} Alertas y mensajes en el feed principal {% endcomment %} 
+
+        {% comment %} Contanido Principal {% endcomment %}
+        <div class="container-fuid content bg-background">
+            <div id="sidebar-main" class="sidebar">
+                {% block sidebar %}{% endblock sidebar %}
+            </div>
+
+            <div id="main">
+                <div class="container-lg pt-3">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show mt-4" role="alert">
+                                {{ message | safe }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                    {% include 'layout/menu_mobile.html' %}
+                    
+                    {% if action == 'actividad' and request.user.is_superuser %}
+                        <a target="_blank" href="{% url 'admin_cursos' %}?action=edit_act_secc&id={{ actividad.id }}" class="btn btn-xs btn-dark mb-3"><i class="fa-solid fa-pen-to-square"></i> Editar Actividad</a>
+                    {% endif %}
+    
+                    {% block content %}{% endblock content %}
+                </div>
+            </div>
+        </div>
+    </body>
+
+    <footer class="bg-light">
+
+        {% block javascript %}
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-A3rJD856KowSb7dwlZdYEkO39Gagi7vIsF0jrRAoQmDKKtQBHUuLZ9AsSv4jD4Xa" crossorigin="anonymous"></script>
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+            <script type="text/javascript" src="{% static 'core/assets/js/functions.js' %}"></script> 
+            <script type="text/javascript" src="{% static 'assets/js/sidebar_perfil.js' %}"></script> 
+            {% block extrajs %}
+            {% endblock extrajs %}
+
+        {% endblock javascript %}
+    </footer>
+</html>

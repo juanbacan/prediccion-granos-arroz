@@ -1,0 +1,28 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+    {% comment %} <div class="py-4" style="background-color: {% block backgorundcolor %}#E9ECF8{% endblock %}"> {% endcomment %}
+    <div class="py-4 bg-background">
+        <div class="container-xl">
+            <div class="row">
+                <div class="{% block col_main %}col-md-8{% endblock %}">
+                    <div class="row">
+                        {% if not notmain %}
+                            <div class="card border-0 mb-4">
+                                <div class="px-1 px-sm-2 px-md-3 card-body">
+                                    {% block main %}{% endblock main %}
+                                </div>
+                            </div>
+                        {% endif %}
+                        
+                        {% block extramain %}{% endblock %}
+                    </div>
+                </div>
+                <div class="{% block col_side %}col-md-4{% endblock %} ps-md-4">
+                    {% block sidebar %}{% endblock sidebar %}
+                </div>
+                {% block mainout %}{% endblock mainout %}
+            </div>
+        </div>
+    </div>
+{% endblock content %}

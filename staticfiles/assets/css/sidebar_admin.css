@@ -1,0 +1,149 @@
+.accordion {
+    padding-right: 0;
+    padding-left: 0;
+}
+.menu-title {
+    padding: 12px 20px!important;
+    letter-spacing: 0.05em;
+    pointer-events: none;
+    cursor: default;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #6a7187;
+    list-style: none;
+    margin-bottom: 0.8rem;
+    padding: 0!important;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+.page-container {
+    height: 100vh;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.main-content {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+.sidebar {
+    width: 350px;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease;
+    border-right: 1px solid #e9e9e9;
+}
+
+.sidebar-content {
+    flex: 1;
+    overflow-y: auto;
+    background-color: white;
+}
+
+.sidebar-header {
+    background-color: white;
+    border-bottom: 1px solid #e9e9e9;
+}
+
+.sidebar-footer {
+    background-color: white ;
+}
+
+/* Media Query para ocultar el sidebar en pantallas menores a 992px */
+@media screen and (max-width: 992px) {
+    .sidebar {
+        margin-left: -350px;
+    }
+}
+
+.hide-sidebar {
+    margin-left: -350px!important;
+}
+
+.content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    transition: width 0.3s ease;
+    width: 100%;
+}
+
+.content-header {
+    flex-shrink: 0;
+}
+
+.content-inner {
+    flex: 1;
+    width: 100%;
+    overflow-y: auto;
+    box-sizing: border-box; 
+}
+
+.btn-sidebar {
+    background-color: #f8f9fc;
+    border: solid 1px #d9d9d9;
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
+    color: #6a7187;
+    cursor: pointer;
+    padding: 10px 10px;
+}
+
+/* mostrar el btn-sidebar solo en pantallas grandes */
+@media screen and (max-width: 992px) {
+    .btn-sidebar {
+        display: none;
+    }
+    .btn-toggle-sidebar {
+        display: block;
+    }
+}
+
+/* ocultar el btn-sidebar en pantallas pequeñas */
+@media screen and (min-width: 992px) {
+    .btn-sidebar {
+        display: block;
+    }
+    .btn-toggle-sidebar {
+        display: none;
+    }
+}
+
+.custom-accordion .accordion-button {
+    border-radius: var(--bs-border-radius) !important;
+    padding: 0.6rem 1rem !important;
+    font-size: 0.9rem;
+    color: #3D5EE1 !important;
+}
+
+
+.custom-accordion .accordion-button.collapsed {
+    color: var(--bs-dark) !important;
+}
+
+.custom-accordion .list-group-item {
+    border: none !important;
+    padding: 0.5rem 1rem !important;
+    font-size: 0.9rem;
+    color: var(--bs-dark) !important;
+    border-radius: var(--bs-border-radius) !important;
+}
+
+.custom-accordion .list-group-item.active {
+    color: #3D5EE1 !important;
+    background-color: var(--bs-light) !important;
+    border: none !important;
+}
+
+.custom-accordion ul {
+    margin-bottom: 0;
+    margin-left: 0;
+}

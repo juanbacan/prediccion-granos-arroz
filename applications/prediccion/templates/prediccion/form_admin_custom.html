@@ -1,0 +1,1039 @@
+{% extends 'layout/base_admin.html' %}
+{% load static %}
+
+{% block breadcrumb %}
+    {% if not request.GET.popup %}
+        <li class="breadcrumb-item" aria-current="page">{{ agrupacion_activa.nombre }}</li>
+        <li class="breadcrumb-item"><a href="{% url 'administracion' %}{{ modulo_activo.url }}">{{ modulo_activo.nombre }}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Crear {{ modulo_activo.nombre }}</li>
+    {% else %}
+        <li class="breadcrumb-item active" aria-current="page">Crear {{ modulo_activo.nombre }}</li>
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="">
+            <div class="">
+                <form method="POST" id="{% if not default_send_form %}mainForm{% endif %}" action="{{ request.get_full_path }}" enctype="multipart/form-data" class="pred-form" novalidate>
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="{% block action %}{{ action }}{% endblock %}" />
+
+                    {% if formevent %}
+                        <input type="hidden" name="event" value="{{ formevent }}">
+                    {% endif %}
+
+                    {% if object %}
+                        <input type="hidden" name="id" value="{{ object.id }}" />
+                    {% endif %}
+
+                    {% if campos_hidden %}
+                        {% for key, value in campos_hidden.items %}
+                            <input type="hidden" name="{{ key }}" value="{{ value }}">
+                        {% endfor %}
+                    {% endif %}
+
+                    {% block form_preffix %}{% endblock %}
+
+                    {% block form %}
+                        {% for hidden in form.hidden_fields %}
+                            {{ hidden }}
+                        {% endfor %}
+
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger mb-3">
+                                {% for error in form.non_field_errors %}
+                                    <div>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        {% if form.n_estimadores %}
+                            <div class="callout callout-info pred-callout">
+                                <h6 class="mb-1 fw-bold"><i class="fas fa-brain mr-1"></i> Entrenamiento de modelos</h6>
+                                <p class="mb-0 small">Completa los datos del dataset, configura los hiperparametros y define el formato de salida.</p>
+                            </div>
+                            <div class="pred-tab-warning alert alert-warning d-none mb-3" role="alert">
+                                Completa Nombre del entrenamiento y Archivo de lotes antes de continuar.
+                            </div>
+
+                            <ul class="nav nav-tabs pred-tabs" id="predTrainTabs" role="tablist" data-gate-dataset="true">
+                                <li class="nav-item" role="presentation">
+                                    <a class="nav-link active" id="train-dataset-tab" href="#train-dataset" role="tab" data-tab-step="1">
+                                        <span class="pred-step-badge">1</span>Dataset
+                                    </a>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <a class="nav-link" id="train-config-tab" href="#train-config" role="tab" data-tab-step="2">
+                                        <span class="pred-step-badge">2</span>Configuracion
+                                    </a>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <a class="nav-link" id="train-output-tab" href="#train-output" role="tab" data-tab-step="3">
+                                        <span class="pred-step-badge">3</span>Salida
+                                    </a>
+                                </li>
+                            </ul>
+
+                            <div class="tab-content pred-tab-content" id="predTrainTabsContent">
+                                <div class="tab-pane fade show active" id="train-dataset" role="tabpanel" aria-labelledby="train-dataset-tab">
+                                    <div class="card card-outline card-primary pred-section-card mt-3">
+                                        <div class="card-header">
+                                            <h3 class="card-title">Dataset</h3>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="pred-field">
+                                                        <label for="{{ form.nombre.id_for_label }}" class="form-label">{{ form.nombre.label|safe }}</label>
+                                                        {% include 'core/forms/fieldRender.html' with field=form.nombre %}
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="pred-field">
+                                                        <label for="{{ form.archivo.id_for_label }}" class="form-label">{{ form.archivo.label|safe }}</label>
+                                                        {% include 'core/forms/fieldRender.html' with field=form.archivo %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="tab-pane fade" id="train-config" role="tabpanel" aria-labelledby="train-config-tab">
+                                    <div class="card card-outline card-info pred-section-card mt-3">
+                                        <div class="card-header">
+                                            <h3 class="card-title">Configuracion de entrenamiento</h3>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <div class="pred-field pred-field-compact">
+                                                        <label for="{{ form.semilla.id_for_label }}" class="form-label">{{ form.semilla.label|safe }}</label>
+                                                        {% include 'core/forms/fieldRender.html' with field=form.semilla %}
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="pred-check mt-md-4">
+                                                        <div class="form-check">
+                                                            {{ form.usar_escalado }}
+                                                            <label class="form-check-label" for="{{ form.usar_escalado.id_for_label }}">{{ form.usar_escalado.label|safe }}</label>
+                                                        </div>
+                                                        {% if form.usar_escalado.help_text %}
+                                                            <small class="form-text text-muted d-block mt-1"><i class="fas fa-info-circle me-1"></i>{{ form.usar_escalado.help_text }}</small>
+                                                        {% endif %}
+                                                        {% if form.usar_escalado.errors %}
+                                                            <div class="field-error-message text-danger mt-1">
+                                                                {% for error in form.usar_escalado.errors %}
+                                                                    <small class="fw-bold"><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</small>
+                                                                {% endfor %}
+                                                            </div>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <div class="pred-field pred-field-compact">
+                                                        <label for="{{ form.n_estimadores.id_for_label }}" class="form-label">{{ form.n_estimadores.label|safe }}</label>
+                                                        {% include 'core/forms/fieldRender.html' with field=form.n_estimadores %}
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="pred-field pred-field-compact">
+                                                        <label for="{{ form.max_profundidad.id_for_label }}" class="form-label">{{ form.max_profundidad.label|safe }}</label>
+                                                        {% include 'core/forms/fieldRender.html' with field=form.max_profundidad %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="tab-pane fade" id="train-output" role="tabpanel" aria-labelledby="train-output-tab">
+                                    <div class="card card-outline card-success pred-section-card mt-3">
+                                        <div class="card-header">
+                                            <h3 class="card-title">Formato de salida</h3>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <div class="pred-field pred-field-compact">
+                                                        <label for="{{ form.decimales.id_for_label }}" class="form-label">{{ form.decimales.label|safe }}</label>
+                                                        {% include 'core/forms/fieldRender.html' with field=form.decimales %}
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <div class="pred-check mt-md-4">
+                                                        <div class="form-check">
+                                                            {{ form.forzar_no_negativo }}
+                                                            <label class="form-check-label" for="{{ form.forzar_no_negativo.id_for_label }}">{{ form.forzar_no_negativo.label|safe }}</label>
+                                                        </div>
+                                                        {% if form.forzar_no_negativo.help_text %}
+                                                            <small class="form-text text-muted d-block mt-1"><i class="fas fa-info-circle me-1"></i>{{ form.forzar_no_negativo.help_text }}</small>
+                                                        {% endif %}
+                                                        {% if form.forzar_no_negativo.errors %}
+                                                            <div class="field-error-message text-danger mt-1">
+                                                                {% for error in form.forzar_no_negativo.errors %}
+                                                                    <small class="fw-bold"><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</small>
+                                                                {% endfor %}
+                                                            </div>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        {% elif form.entrenamiento %}
+                            <div class="callout callout-info pred-callout">
+                                <h5 class="mb-1"><i class="fas fa-chart-line mr-1"></i> Nueva prediccion</h5>
+                                {% if form.manual_humedad_mp %}
+                                    <p class="mb-0 small">Ingresa una corrida manual de horno para obtener la predicción inmediata.</p>
+                                {% else %}
+                                    <p class="mb-0">Selecciona un entrenamiento finalizado y carga el archivo de entrada para generar predicciones.</p>
+                                {% endif %}
+                            </div>
+
+                            <div class="pred-tab-warning alert alert-warning d-none mb-3" role="alert">
+                                {% if form.manual_humedad_mp %}
+                                    Completa todos los campos manuales antes de continuar.
+                                {% else %}
+                                    Completa Nombre de la prediccion y Archivo de entrada antes de continuar.
+                                {% endif %}
+                            </div>
+
+                            <ul class="nav nav-tabs pred-tabs" id="predRunTabs" role="tablist" data-gate-dataset="true">
+                                <li class="nav-item" role="presentation">
+                                    <a class="nav-link active" id="pred-main-tab" href="#pred-main" role="tab" data-tab-step="1">
+                                        <span class="pred-step-badge">1</span>Datos principales
+                                    </a>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <a class="nav-link" id="pred-output-tab" href="#pred-output" role="tab" data-tab-step="2">
+                                        <span class="pred-step-badge">2</span>Salida
+                                    </a>
+                                </li>
+                            </ul>
+
+                            <div class="tab-content pred-tab-content" id="predRunTabsContent">
+                                <div class="tab-pane fade show active" id="pred-main" role="tabpanel" aria-labelledby="pred-main-tab">
+                                    <div class="card card-outline card-primary pred-section-card mt-3">
+                                        <div class="card-header">
+                                            <h3 class="card-title">Datos principales</h3>
+                                        </div>
+                                        <div class="card-body">
+                                            {% if form.manual_humedad_mp %}
+                                                <div class="row">
+                                                    <div class="col-md-12 col-lg-6">
+                                                        <div class="pred-field">
+                                                            <label for="{{ form.entrenamiento.id_for_label }}" class="form-label">{{ form.entrenamiento.label|safe }}</label>
+                                                            {% include 'core/forms/fieldRender.html' with field=form.entrenamiento %}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            {% else %}
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="pred-field">
+                                                            <label for="{{ form.nombre.id_for_label }}" class="form-label">{{ form.nombre.label|safe }}</label>
+                                                            {% include 'core/forms/fieldRender.html' with field=form.nombre %}
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="pred-field">
+                                                            <label for="{{ form.entrenamiento.id_for_label }}" class="form-label">{{ form.entrenamiento.label|safe }}</label>
+                                                            {% include 'core/forms/fieldRender.html' with field=form.entrenamiento %}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            {% endif %}
+
+                                            {% if form.archivo %}
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        <div class="pred-field">
+                                                            <label for="{{ form.archivo.id_for_label }}" class="form-label">{{ form.archivo.label|safe }}</label>
+                                                            {% include 'core/forms/fieldRender.html' with field=form.archivo %}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            {% endif %}
+
+                                            {% if form.manual_humedad_mp %}
+                                                <div class="pred-manual-block">
+                                                    <h6 class="pred-manual-title">Materia prima</h6>
+                                                    <div class="row">
+                                                        <div class="col-lg-4 col-md-6">
+                                                            <div class="pred-field pred-field-manual">
+                                                                <label for="{{ form.manual_tipo_grano.id_for_label }}" class="form-label">{{ form.manual_tipo_grano.label|safe }}</label>
+                                                                {% include 'core/forms/fieldRender.html' with field=form.manual_tipo_grano %}
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-lg-4 col-md-6">
+                                                            <div class="pred-field pred-field-manual">
+                                                                <label for="{{ form.manual_humedad_mp.id_for_label }}" class="form-label">{{ form.manual_humedad_mp.label|safe }}</label>
+                                                                {% include 'core/forms/fieldRender.html' with field=form.manual_humedad_mp %}
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-lg-4 col-md-6">
+                                                            <div class="pred-field pred-field-manual">
+                                                                <label for="{{ form.manual_blancura_mp.id_for_label }}" class="form-label">{{ form.manual_blancura_mp.label|safe }}</label>
+                                                                {% include 'core/forms/fieldRender.html' with field=form.manual_blancura_mp %}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="pred-manual-block">
+                                                    <h6 class="pred-manual-title">Deshidratacion</h6>
+                                                    <div class="row">
+                                                        <div class="col-lg-6 col-md-6">
+                                                            <div class="pred-field pred-field-manual">
+                                                                <label for="{{ form.manual_t_desh.id_for_label }}" class="form-label">{{ form.manual_t_desh.label|safe }}</label>
+                                                                {% include 'core/forms/fieldRender.html' with field=form.manual_t_desh %}
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-lg-6 col-md-6">
+                                                            <div class="pred-field pred-field-manual">
+                                                                <label for="{{ form.manual_temp_desh.id_for_label }}" class="form-label">{{ form.manual_temp_desh.label|safe }}</label>
+                                                                {% include 'core/forms/fieldRender.html' with field=form.manual_temp_desh %}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="pred-manual-block mb-0">
+                                                    <h6 class="pred-manual-title">Coloracion</h6>
+                                                    <div class="row">
+                                                        <div class="col-lg-6 col-md-6">
+                                                            <div class="pred-field pred-field-manual">
+                                                                <label for="{{ form.manual_t_col.id_for_label }}" class="form-label">{{ form.manual_t_col.label|safe }}</label>
+                                                                {% include 'core/forms/fieldRender.html' with field=form.manual_t_col %}
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-lg-6 col-md-6">
+                                                            <div class="pred-field pred-field-manual">
+                                                                <label for="{{ form.manual_temp_col.id_for_label }}" class="form-label">{{ form.manual_temp_col.label|safe }}</label>
+                                                                {% include 'core/forms/fieldRender.html' with field=form.manual_temp_col %}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="tab-pane fade" id="pred-output" role="tabpanel" aria-labelledby="pred-output-tab">
+                                    <div class="card card-outline card-success pred-section-card mt-3">
+                                        <div class="card-header">
+                                            <h3 class="card-title">Opciones de salida</h3>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <div class="pred-field pred-field-compact">
+                                                        <label for="{{ form.decimales.id_for_label }}" class="form-label">{{ form.decimales.label|safe }}</label>
+                                                        {% include 'core/forms/fieldRender.html' with field=form.decimales %}
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <div class="pred-check mt-md-4">
+                                                        <div class="form-check">
+                                                            {{ form.forzar_no_negativo }}
+                                                            <label class="form-check-label" for="{{ form.forzar_no_negativo.id_for_label }}">{{ form.forzar_no_negativo.label|safe }}</label>
+                                                        </div>
+                                                        {% if form.forzar_no_negativo.help_text %}
+                                                            <small class="form-text text-muted d-block mt-1"><i class="fas fa-info-circle me-1"></i>{{ form.forzar_no_negativo.help_text }}</small>
+                                                        {% endif %}
+                                                        {% if form.forzar_no_negativo.errors %}
+                                                            <div class="field-error-message text-danger mt-1">
+                                                                {% for error in form.forzar_no_negativo.errors %}
+                                                                    <small class="fw-bold"><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</small>
+                                                                {% endfor %}
+                                                            </div>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {% if form.manual_humedad_mp %}
+                                <div id="manual-pred-result" class="card card-outline card-success pred-section-card mt-3 d-none" aria-live="polite">
+                                    <div class="card-header">
+                                        <h3 class="card-title">Resultado de prediccion manual</h3>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="pred-result-box">
+                                                    <small>Humedad PT predicha</small>
+                                                    <strong id="manual-result-humedad">-</strong>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="pred-result-box">
+                                                    <small>Blancura PT predicha</small>
+                                                    <strong id="manual-result-blancura">-</strong>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <small id="manual-result-meta" class="text-muted d-block mt-2"></small>
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                        {% elif form.helper %}
+                            {{ form.helper.render_layout|safe }}
+                            {% if form.inline_formsets and not form.inlines_rendered_in_layout %}
+                                {% include 'core/forms/form_inline.html' %}
+                            {% endif %}
+                        {% else %}
+                            {% include 'core/forms/form.html' %}
+                        {% endif %}
+                    {% endblock %}
+
+                    {% block form_suffix %}{% endblock %}
+
+                    {% block form_buttons %}
+                        {% if not form.view_only %}
+                            <div class="pred-form-actions mt-4 pt-3 border-top">
+                                <div class="d-flex flex-column flex-md-row justify-content-between gap-2">
+                                    <div class="d-grid d-md-flex gap-2">
+                                        <input type="submit" class="btn btn-primary" value="Guardar" name="_save" />
+                                        {% if form.manual_humedad_mp %}
+                                            <button type="button" id="btn-limpiar-manual" class="btn btn-outline-secondary">Limpiar campos</button>
+                                        {% endif %}
+
+                                        {% comment %} {% if not request.GET.popup %}
+                                            <input type="submit" class="btn btn-outline-primary" value="Guardar y Añadir Otro" name="_addanother" />
+                                            <input type="submit" class="btn btn-outline-primary" value="Guardar y Continuar Editando" name="_continue" />
+                                        {% endif %} {% endcomment %}
+                                    </div>
+                                    {% if object and formdeleteaction %}
+                                        <div class="d-grid d-md-flex gap-2">
+                                            <a href="javascript:" nhref="{{ request.path }}?action={{ formdeleteaction }}&id={{ object.id }}" class="btn btn-outline-danger formmodal">Eliminar</a>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="alert alert-secondary mt-4" role="alert">Modo solo lectura</div>
+                        {% endif %}
+                    {% endblock %}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% include 'core/forms/form_modals.html' %}
+
+{% block extracss %}
+    {% include 'core/forms/form_css.html' %}
+    <style>
+        .pred-form-card {
+            border-radius: 10px;
+            border: 1px solid #e7ebf1;
+        }
+
+        .pred-callout {
+            border-left-color: #17a2b8;
+            margin-bottom: 1rem;
+            background: linear-gradient(90deg, #d9f1f6 0%, #eaf8fb 100%);
+            border-radius: 6px;
+        }
+
+        .pred-section-card {
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(14, 30, 37, 0.08);
+        }
+
+        .pred-tabs {
+            border-bottom: 1px solid #d9e2ee;
+            gap: 0.25rem;
+        }
+
+        .pred-tabs .nav-link {
+            color: #4b5a6c;
+            border: 1px solid transparent;
+            border-top-left-radius: 0.5rem;
+            border-top-right-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 0.86rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+        }
+
+        .pred-tabs .nav-link.active {
+            color: #1f2f44;
+            background-color: #ffffff;
+            border-color: #d9e2ee #d9e2ee #ffffff;
+        }
+
+        .pred-tabs .nav-link.disabled,
+        .pred-tabs .nav-link[aria-disabled="true"] {
+            opacity: 0.58;
+            cursor: not-allowed;
+        }
+
+        .pred-tab-content {
+            background: #fff;
+            border: 1px solid #d9e2ee;
+            border-top: 0;
+            border-bottom-left-radius: 0.5rem;
+            border-bottom-right-radius: 0.5rem;
+            padding: 0.5rem 0.7rem;
+            margin-bottom: 1rem;
+        }
+
+        .pred-section-card .card-header {
+            padding: 0.65rem 1rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.07);
+            background: #f8fafc;
+        }
+
+        .pred-section-card .card-title {
+            font-size: 1rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+        }
+
+        .pred-step-badge {
+            width: 1.4rem;
+            height: 1.4rem;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.78rem;
+            color: #fff;
+            background: #3f6791;
+            font-weight: 700;
+        }
+
+        .pred-section-card .card-body {
+            padding: 1.1rem 1.15rem 0.8rem;
+        }
+
+        .pred-section-card .row {
+            --bs-gutter-x: 1.35rem;
+            --bs-gutter-y: 0.9rem;
+        }
+
+        .pred-field,
+        .pred-check {
+            margin-bottom: 1rem;
+        }
+
+        .pred-form .form-label {
+            margin-bottom: 0.45rem;
+            font-weight: 600;
+            color: #2f3a46;
+            font-size: 0.82rem;
+            letter-spacing: 0.01em;
+        }
+
+        .pred-form .form-control,
+        .pred-form .form-select,
+        .pred-form .custom-file-input {
+            border-radius: 0.25rem;
+            border-color: #ced7e2;
+        }
+
+        .pred-field-compact .form-control,
+        .pred-field-compact .form-select,
+        .pred-field-compact .input-group {
+            max-width: 220px;
+        }
+
+        .pred-field-medium .form-control,
+        .pred-field-medium .form-select,
+        .pred-field-medium .input-group {
+            max-width: 320px;
+        }
+
+        .pred-form .form-control:focus,
+        .pred-form .form-select:focus,
+        .pred-form .custom-file-input:focus {
+            border-color: #5b91c8;
+            box-shadow: 0 0 0 0.13rem rgba(63, 103, 145, 0.18);
+        }
+
+        .pred-check {
+            background: #f8f9fa;
+            border: 1px solid #e5e9ef;
+            border-radius: 6px;
+            padding: 0.8rem 0.95rem;
+            transition: border-color 0.2s ease, background-color 0.2s ease;
+        }
+
+        .pred-check:hover {
+            border-color: #c7d5e7;
+            background: #fdfefe;
+        }
+
+        .pred-check .form-check {
+            min-height: 1.25rem;
+            margin-bottom: 0;
+        }
+
+        .pred-check .form-check-input {
+            margin-top: 0.18rem;
+        }
+
+        .pred-check .form-check-label {
+            font-weight: 600;
+            color: #2f3a46;
+            margin-bottom: 0;
+        }
+
+        .pred-form .form-text {
+            font-size: 0.74rem;
+            line-height: 1.2;
+            color: #738192 !important;
+            margin-top: 0.4rem !important;
+        }
+
+        .pred-form .form-text i {
+            font-size: 0.72rem;
+        }
+
+        .pred-client-invalid {
+            display: block;
+            color: #dc3545;
+            font-size: 0.76rem;
+            margin-top: 0.35rem;
+            font-weight: 600;
+        }
+
+        .pred-form-actions {
+            background: #fbfcfd;
+            border-radius: 6px;
+            padding: 0.75rem;
+            border: 1px solid #e7edf3;
+            position: sticky;
+            bottom: 0;
+            z-index: 5;
+        }
+
+        .pred-manual-block {
+            border: 1px solid #e6ebf2;
+            border-radius: 8px;
+            background: #fafcfe;
+            padding: 0.85rem 0.95rem 0.2rem;
+            margin-bottom: 0.85rem;
+        }
+
+        .pred-manual-title {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #2c4361;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            margin-bottom: 0.6rem;
+        }
+
+        .pred-field-manual .form-control,
+        .pred-field-manual .form-select,
+        .pred-field-manual .input-group {
+            max-width: 100%;
+            width: 100%;
+        }
+
+        .pred-result-box {
+            background: #f6fbf6;
+            border: 1px solid #d4e9d4;
+            border-radius: 6px;
+            padding: 0.75rem 0.9rem;
+            min-height: 84px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .pred-result-box small {
+            color: #597259;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.7rem;
+            letter-spacing: 0.03em;
+        }
+
+        .pred-result-box strong {
+            color: #204a20;
+            font-size: 1.35rem;
+            line-height: 1.2;
+            margin-top: 0.15rem;
+        }
+
+        @media (max-width: 767.98px) {
+            .pred-form-card .card-body {
+                padding: 1rem;
+            }
+
+            .pred-section-card .card-body {
+                padding: 0.95rem 0.9rem 0.65rem;
+            }
+
+            .pred-section-card .row {
+                --bs-gutter-x: 0.9rem;
+                --bs-gutter-y: 0.45rem;
+            }
+
+            .pred-check {
+                margin-top: 0.25rem;
+                padding: 0.72rem 0.85rem;
+            }
+
+            .pred-field-compact .form-control,
+            .pred-field-compact .form-select,
+            .pred-field-compact .input-group,
+            .pred-field-medium .form-control,
+            .pred-field-medium .form-select,
+            .pred-field-medium .input-group {
+                max-width: 100%;
+            }
+
+            .pred-form-actions {
+                position: static;
+            }
+
+            .pred-manual-block {
+                padding: 0.72rem 0.82rem 0.1rem;
+                margin-bottom: 0.7rem;
+            }
+
+            .pred-tabs .nav-link {
+                font-size: 0.8rem;
+                padding: 0.55rem 0.65rem;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block extrajs %}
+    {% include 'core/forms/form_js.html' %}
+    <script>
+        (function () {
+            function isStepOneValid(formEl) {
+                if (!formEl) return false;
+
+                var nombre = formEl.querySelector('[name="nombre"]');
+                var archivo = formEl.querySelector('[name="archivo"]');
+                var hasManualFields = !!formEl.querySelector('[name="manual_humedad_mp"]');
+
+                var nombreOk = !nombre || !!(nombre.value && nombre.value.trim().length > 0);
+                var archivoOk = false;
+                var manualOk = false;
+
+                if (archivo) {
+                    if (archivo.files && archivo.files.length > 0) {
+                        archivoOk = true;
+                    } else {
+                        archivoOk = !archivo.hasAttribute('required');
+                    }
+                }
+
+                if (hasManualFields) {
+                    var manualFields = [
+                        'manual_humedad_mp',
+                        'manual_blancura_mp',
+                        'manual_t_desh',
+                        'manual_temp_desh',
+                        'manual_t_col',
+                        'manual_temp_col'
+                    ];
+
+                    manualOk = manualFields.every(function (name) {
+                        var el = formEl.querySelector('[name="' + name + '"]');
+                        return !!(el && el.value && String(el.value).trim().length > 0);
+                    });
+                }
+
+                if (hasManualFields) {
+                    return manualOk;
+                }
+
+                return nombreOk && archivoOk;
+            }
+
+            function toggleWarning(tabContainer, show) {
+                var warning = tabContainer.parentElement.querySelector('.pred-tab-warning');
+                if (!warning) return;
+                warning.classList.toggle('d-none', !show);
+            }
+
+            function activateTabForField(formEl, tabs, links, fieldEl) {
+                if (!formEl || !tabs || !links || !fieldEl) return;
+                var pane = fieldEl.closest('.tab-pane');
+                if (!pane || !pane.id) return;
+                var link = tabs.querySelector('.nav-link[href="#' + pane.id + '"]');
+                if (!link) return;
+                activateTab(formEl, links, link);
+            }
+
+            function clearClientInvalidMessages(formEl) {
+                if (!formEl) return;
+                formEl.querySelectorAll('.pred-client-invalid').forEach(function (el) {
+                    el.remove();
+                });
+            }
+
+            function showClientInvalidMessage(fieldEl) {
+                if (!fieldEl) return;
+
+                var msg = fieldEl.validationMessage || 'Revisa este campo.';
+                var container = fieldEl.closest('.pred-field, .pred-check, .fk-block, .input-group') || fieldEl.parentElement;
+                if (!container) return;
+
+                var hint = document.createElement('small');
+                hint.className = 'pred-client-invalid';
+                hint.textContent = msg;
+                container.appendChild(hint);
+            }
+
+            function activateTab(formEl, links, targetLink) {
+                if (!targetLink) return;
+
+                links.forEach(function (link) {
+                    link.classList.remove('active');
+                    link.setAttribute('aria-selected', 'false');
+                });
+
+                targetLink.classList.add('active');
+                targetLink.setAttribute('aria-selected', 'true');
+
+                var targetSelector = targetLink.getAttribute('href');
+                if (!targetSelector || targetSelector.charAt(0) !== '#') return;
+
+                var panes = formEl.querySelectorAll('.tab-pane');
+                panes.forEach(function (pane) {
+                    pane.classList.remove('show', 'active');
+                });
+
+                var targetPane = formEl.querySelector(targetSelector);
+                if (targetPane) {
+                    targetPane.classList.add('show', 'active');
+                }
+            }
+
+            function findFirstErrorTabLink(formEl, tabs) {
+                if (!formEl || !tabs) return null;
+
+                var panes = formEl.querySelectorAll('.tab-pane');
+                for (var i = 0; i < panes.length; i++) {
+                    var pane = panes[i];
+                    var hasError = pane.querySelector('.field-error-message, .invalid-feedback:not(:empty), .is-invalid');
+                    if (hasError) {
+                        return tabs.querySelector('.nav-link[href="#' + pane.id + '"]');
+                    }
+                }
+                return null;
+            }
+
+            function asNumber(value) {
+                var parsed = Number(value);
+                return Number.isFinite(parsed) ? parsed : null;
+            }
+
+            function renderManualPredictionResult(payload) {
+                var resultCard = document.getElementById('manual-pred-result');
+                if (!resultCard || !payload) return;
+
+                var humedadNode = document.getElementById('manual-result-humedad');
+                var blancuraNode = document.getElementById('manual-result-blancura');
+                var metaNode = document.getElementById('manual-result-meta');
+
+                var decimales = parseInt(payload.decimales || 2, 10);
+                if (!Number.isFinite(decimales) || decimales < 0) decimales = 2;
+
+                var humedad = asNumber(payload.humedad_pt_pred);
+                var blancura = asNumber(payload.blancura_pt_pred);
+
+                humedadNode.textContent = humedad === null ? '-' : humedad.toFixed(decimales);
+                blancuraNode.textContent = blancura === null ? '-' : blancura.toFixed(decimales);
+                metaNode.textContent = payload.nombre ? ('Prediccion: ' + payload.nombre) : '';
+
+                resultCard.classList.remove('d-none');
+                resultCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
+            function clearManualPredictionForm(formEl) {
+                if (!formEl) return;
+
+                var manualFields = [
+                    'manual_tipo_grano',
+                    'manual_humedad_mp',
+                    'manual_blancura_mp',
+                    'manual_t_desh',
+                    'manual_temp_desh',
+                    'manual_t_col',
+                    'manual_temp_col'
+                ];
+
+                manualFields.forEach(function (name) {
+                    var el = formEl.querySelector('[name="' + name + '"]');
+                    if (!el) return;
+
+                    if (el.tagName === 'SELECT') {
+                        el.selectedIndex = 0;
+                    } else if (el.type === 'checkbox' || el.type === 'radio') {
+                        el.checked = false;
+                    } else {
+                        el.value = '';
+                    }
+
+                    el.dispatchEvent(new Event('input', { bubbles: true }));
+                    el.dispatchEvent(new Event('change', { bubbles: true }));
+                });
+
+                formEl.classList.remove('was-validated');
+                clearClientInvalidMessages(formEl);
+
+                var resultCard = document.getElementById('manual-pred-result');
+                if (resultCard) {
+                    resultCard.classList.add('d-none');
+                }
+
+                var humedadNode = document.getElementById('manual-result-humedad');
+                var blancuraNode = document.getElementById('manual-result-blancura');
+                var metaNode = document.getElementById('manual-result-meta');
+
+                if (humedadNode) humedadNode.textContent = '-';
+                if (blancuraNode) blancuraNode.textContent = '-';
+                if (metaNode) metaNode.textContent = '';
+
+                var firstManual = formEl.querySelector('[name="manual_tipo_grano"], [name="manual_humedad_mp"]');
+                if (firstManual) firstManual.focus();
+            }
+
+            document.addEventListener('DOMContentLoaded', function () {
+                var tabGroups = document.querySelectorAll('.pred-tabs[data-gate-dataset="true"]');
+
+                tabGroups.forEach(function (tabs) {
+                    var formEl = tabs.closest('form');
+                    var links = tabs.querySelectorAll('.nav-link');
+
+                    links.forEach(function (link) {
+                        link.addEventListener('click', function (event) {
+                            event.preventDefault();
+
+                            var step = parseInt(link.getAttribute('data-tab-step') || '1', 10);
+                            if (step <= 1) {
+                                toggleWarning(tabs, false);
+                                activateTab(formEl, links, link);
+                                return;
+                            }
+
+                            if (!isStepOneValid(formEl)) {
+                                toggleWarning(tabs, true);
+                            } else {
+                                toggleWarning(tabs, false);
+                                activateTab(formEl, links, link);
+                            }
+                        });
+                    });
+
+                    var errorTabLink = findFirstErrorTabLink(formEl, tabs);
+                    var currentActive = errorTabLink || tabs.querySelector('.nav-link.active') || links[0];
+                    activateTab(formEl, links, currentActive);
+                    if (errorTabLink) {
+                        toggleWarning(tabs, false);
+                    }
+
+                    var nombreInput = formEl ? formEl.querySelector('[name="nombre"]') : null;
+                    var archivoInput = formEl ? formEl.querySelector('[name="archivo"]') : null;
+
+                    if (nombreInput) {
+                        nombreInput.addEventListener('input', function () {
+                            if (isStepOneValid(formEl)) toggleWarning(tabs, false);
+                        });
+                    }
+
+                    if (archivoInput) {
+                        archivoInput.addEventListener('change', function () {
+                            if (isStepOneValid(formEl)) toggleWarning(tabs, false);
+                        });
+                    }
+
+                    // Si hay error de validación frontend, abrir el tab correspondiente.
+                    if (formEl) {
+                        formEl.addEventListener('submit', function () {
+                            clearClientInvalidMessages(formEl);
+                            var firstInvalid = formEl.querySelector(':invalid');
+                            if (firstInvalid) {
+                                activateTabForField(formEl, tabs, links, firstInvalid);
+                                setTimeout(function () {
+                                    showClientInvalidMessage(firstInvalid);
+                                }, 0);
+                            }
+                        }, true);
+
+                        formEl.addEventListener('input', function (event) {
+                            var target = event.target;
+                            if (target && target.matches('input, select, textarea') && target.checkValidity()) {
+                                clearClientInvalidMessages(formEl);
+                            }
+                        });
+
+                        formEl.addEventListener('change', function (event) {
+                            var target = event.target;
+                            if (target && target.matches('input, select, textarea') && target.checkValidity()) {
+                                clearClientInvalidMessages(formEl);
+                            }
+                        });
+
+                        // Si backend agrega errores dinámicamente (.field-error-message), ir al tab del primer error.
+                        var observer = new MutationObserver(function () {
+                            var firstServerErrorField = formEl.querySelector('.field-error-message')
+                                ? formEl.querySelector('.field-error-message').parentElement.querySelector('input, select, textarea')
+                                : null;
+                            if (firstServerErrorField) {
+                                activateTabForField(formEl, tabs, links, firstServerErrorField);
+                            }
+                        });
+                        observer.observe(formEl, { childList: true, subtree: true });
+                    }
+                });
+
+                var manualResultCard = document.getElementById('manual-pred-result');
+                var manualForm = document.getElementById('mainForm');
+                var isManual = !!(manualResultCard && manualForm && manualForm.querySelector('[name="manual_humedad_mp"]'));
+
+                if (isManual) {
+                    var clearButton = document.getElementById('btn-limpiar-manual');
+
+                    if (clearButton) {
+                        clearButton.addEventListener('click', function () {
+                            clearManualPredictionForm(manualForm);
+                        });
+                    }
+
+                    manualForm.addEventListener('submit', async function (event) {
+                        event.preventDefault();
+                        event.stopImmediatePropagation();
+
+                        var response = await submitModalForm1('mainForm');
+                        if (response && response.result === 'ok' && response.resp) {
+                            renderManualPredictionResult(response.resp);
+                        }
+                    }, true);
+                }
+            });
+        })();
+    </script>
+{% endblock %}

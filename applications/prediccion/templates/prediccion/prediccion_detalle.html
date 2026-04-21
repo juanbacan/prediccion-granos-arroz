@@ -1,0 +1,180 @@
+{% extends 'layout/base_admin.html' %}
+{% load static %}
+
+{% block title %}
+  <div class="col-sm-6">
+    <h1 class="mb-0 h3">
+      <i class="fa fa-file-excel"></i> Detalle de Predicción
+    </h1>
+  </div>
+{% endblock %}
+
+{% block breadcrumb %}
+  <li class="breadcrumb-item"><a href="{% url 'admin_prediccion' %}">Predicciones</a></li>
+  <li class="breadcrumb-item active" aria-current="page">Detalle #{{ prediccion.id }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">
+          <i class="fa fa-info-circle"></i> {{ prediccion.nombre }}
+        </h3>
+        <div class="card-tools">
+          {% if prediccion.estado == 'DONE' %}
+            <span class="badge bg-success"><i class="fa fa-check"></i> Completado</span>
+          {% elif prediccion.estado == 'RUNNING' %}
+            <span class="badge bg-info"><i class="fa fa-spinner fa-spin"></i> En Proceso</span>
+          {% elif prediccion.estado == 'FAILED' %}
+            <span class="badge bg-danger"><i class="fa fa-times"></i> Falló</span>
+          {% elif prediccion.estado == 'PENDING' %}
+            <span class="badge bg-warning"><i class="fa fa-clock"></i> Pendiente</span>
+          {% endif %}
+        </div>
+      </div>
+      <div class="card-body">
+        <!-- Información General -->
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <p><strong>Modelo utilizado:</strong> 
+              <a href="{% url 'admin_entrenamientos' %}?action=ver_detalle&id={{ prediccion.entrenamiento.id }}">
+                {{ prediccion.entrenamiento.nombre }}
+              </a>
+            </p>
+            <p><strong>Dataset del modelo:</strong> {{ prediccion.entrenamiento.dataset.nombre }}</p>
+            <p><strong>Filas de entrada:</strong> {{ prediccion.filas_in|default:"—" }}</p>
+            <p><strong>Filas procesadas:</strong> {{ prediccion.filas_out|default:"—" }}</p>
+          </div>
+          <div class="col-md-6">
+            <p><strong>Iniciado:</strong> {{ prediccion.iniciado_en|date:"d/m/Y H:i:s"|default:"—" }}</p>
+            <p><strong>Finalizado:</strong> {{ prediccion.finalizado_en|date:"d/m/Y H:i:s"|default:"—" }}</p>
+            {% if prediccion.iniciado_en and prediccion.finalizado_en %}
+              {% with duracion=prediccion.finalizado_en|timeuntil:prediccion.iniciado_en %}
+                <p><strong>Duración:</strong> {{ duracion }}</p>
+              {% endwith %}
+            {% endif %}
+          </div>
+        </div>
+
+        <hr>
+
+        {% if prediccion.estado == 'DONE' %}
+          <!-- Archivos -->
+          <h4 class="mt-4"><i class="fa fa-file-alt"></i> Archivos</h4>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="card">
+                <div class="card-header">
+                  <h5 class="card-title"><i class="fa fa-upload"></i> Archivo de Entrada</h5>
+                </div>
+                <div class="card-body">
+                  {% if prediccion.input_file %}
+                    <p><strong>Archivo:</strong> {{ prediccion.input_file.name }}</p>
+                    <a href="{{ prediccion.input_file.url }}" class="btn btn-primary btn-sm" download>
+                      <i class="fa fa-download"></i> Descargar entrada
+                    </a>
+                  {% else %}
+                    <p class="text-muted">No disponible</p>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="card">
+                <div class="card-header">
+                  <h5 class="card-title"><i class="fa fa-download"></i> Archivo de Salida (Predicciones)</h5>
+                </div>
+                <div class="card-body">
+                  {% if prediccion.output_file %}
+                    <p><strong>Archivo:</strong> {{ prediccion.output_file.name }}</p>
+                    <a href="{{ prediccion.output_file.url }}" class="btn btn-success btn-sm" download>
+                      <i class="fa fa-download"></i> Descargar predicciones
+                    </a>
+                  {% else %}
+                    <p class="text-muted">No disponible</p>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Resumen/Log (si hay) -->
+          {% if prediccion.resumen %}
+            <hr class="my-4">
+            <h4 class="mt-4"><i class="fa fa-file-alt"></i> Resumen</h4>
+            <div class="card">
+              <div class="card-body">
+                <pre style="white-space: pre-wrap; font-size: 0.9em;">{{ prediccion.resumen }}</pre>
+              </div>
+            </div>
+          {% endif %}
+
+        {% elif prediccion.estado == 'FAILED' %}
+          <!-- Errores -->
+          <div class="alert alert-danger" role="alert">
+            <h4 class="alert-heading"><i class="fa fa-exclamation-triangle"></i> La predicción ha fallado</h4>
+            <hr>
+            <pre class="mb-0" style="white-space: pre-wrap; font-size: 0.9em;">{{ prediccion.resumen|default:"No se registraron detalles del error." }}</pre>
+          </div>
+
+        {% elif prediccion.estado == 'RUNNING' %}
+          <!-- En Proceso -->
+          <div class="alert alert-info" role="alert">
+            <h4 class="alert-heading"><i class="fa fa-spinner fa-spin"></i> Predicción en proceso</h4>
+            <p>La predicción está en ejecución. Por favor, recarga esta página en unos momentos para ver los resultados.</p>
+          </div>
+
+        {% elif prediccion.estado == 'PENDING' %}
+          <!-- Pendiente -->
+          <div class="alert alert-warning" role="alert">
+            <h4 class="alert-heading"><i class="fa fa-clock"></i> Predicción pendiente</h4>
+            <p>Esta predicción aún no ha iniciado.</p>
+          </div>
+        {% endif %}
+
+        <!-- Métricas del modelo utilizado (opcional) -->
+        {% if prediccion.estado == 'DONE' %}
+          <hr class="my-4">
+          <h4 class="mt-4"><i class="fa fa-chart-bar"></i> Métricas del Modelo Utilizado</h4>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="card">
+                <div class="card-header">
+                  <h5 class="card-title">Y1 (Humedad PT)</h5>
+                </div>
+                <div class="card-body">
+                  <p><strong>MSE:</strong> {{ prediccion.entrenamiento.y1_mse|floatformat:6|default:"—" }}</p>
+                  <p><strong>RMSE:</strong> {{ prediccion.entrenamiento.y1_rmse|floatformat:6|default:"—" }}</p>
+                  <p><strong>R²:</strong> {{ prediccion.entrenamiento.y1_r2|floatformat:6|default:"—" }}</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="card">
+                <div class="card-header">
+                  <h5 class="card-title">Y2 (Blancura PT)</h5>
+                </div>
+                <div class="card-body">
+                  <p><strong>MSE:</strong> {{ prediccion.entrenamiento.y2_mse|floatformat:6|default:"—" }}</p>
+                  <p><strong>RMSE:</strong> {{ prediccion.entrenamiento.y2_rmse|floatformat:6|default:"—" }}</p>
+                  <p><strong>R²:</strong> {{ prediccion.entrenamiento.y2_r2|floatformat:6|default:"—" }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+
+        <!-- Botón volver -->
+        <div class="mt-4">
+          <a href="{% url 'admin_prediccion' %}" class="btn btn-secondary">
+            <i class="fa fa-arrow-left"></i> Volver a la lista
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

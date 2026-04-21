@@ -1,0 +1,89 @@
+{% extends "account/base.html" %}
+
+{% load account socialaccount %}
+{% load core_extras %}
+
+{% block meta_tags %}
+	{{ block.super }}
+    <title>Simulador ICFES | Login</title>
+    <meta name="title" content="Simulador ICFES | Login"/>
+    <meta name="description" content="Ingresa a tu cuenta de Simulador ICFES y practica con miles de ejercicios resueltos">
+{% endblock %}
+
+
+{% block extrajs %}
+<script>
+    function togglePasswordVisibility(fieldId) {
+        const passwordField = document.getElementById(fieldId);
+        if (passwordField.type === 'password') {
+            passwordField.type = 'text';
+        } else {
+            passwordField.type = 'password';
+        }
+		// Cambiar icono
+		const icon = document.querySelector(`#${fieldId} + button i`);
+		if (icon.classList.contains('fa-eye-slash')) {
+			icon.classList.remove('fa-eye-slash');
+			icon.classList.add('fa-eye');
+		} else {
+			icon.classList.remove('fa-eye');
+			icon.classList.add('fa-eye-slash');
+		}
+    }
+</script>
+{% endblock %}
+
+{% block main %}
+	<h1 class="text-center mb-5">¡Bienvenido de Nuevo!</h1>
+	{% comment %} <p class="text-center">¿No tienes una cuenta? <a class="link-primary" href="{{ signup_url }}">Regístrate</a></p> {% endcomment %}
+	{% get_providers as socialaccount_providers %}
+	{% if socialaccount_providers %}
+		<div class="socialaccount_ballot">
+			{% include "socialaccount/snippets/provider_list.html" with process="login" %}
+			<div class="mt-5 mb-3 text-center" style="color: #929292; font-size: 13px; font-weight: 600;">o puedes ingresar con:</div>
+		</div>
+		{% include "socialaccount/snippets/login_extra.html" %}
+	{% endif %}
+
+	<form class="login" method="POST" action="{% url 'account_login' %}">
+		{% csrf_token %}
+		<div class="row">
+			{% for field in form %}
+				<div class="col-md-12 d-flex align-items-center mb-3 gap-1">
+					<div class="label-container-form" style="width: 160px;">
+						<label class="form-label form-label-text">{{ field.label }}:</label>
+					</div>
+					<div class="w-100">
+						{% if field.field.widget.input_type == 'password' %}
+							<div class="input-group mb-3">
+								{{ field|add_class }}
+								<button type="button" class="input-group-text" onclick="togglePasswordVisibility('{{ field.id_for_label }}')"><i class="fa-solid fa-eye"></i></button>
+							</div>
+						{% else %}
+							{{ field|add_class }}
+						{% endif %}
+					</div>
+				</div>
+			{% endfor %}
+		</div>
+
+		{% comment %} Form errors {% endcomment %}
+		{% if form.non_field_errors %}
+			<div class="alert alert-danger mt-3">
+				{% for error in form.non_field_errors %}
+					{{ error }}
+				{% endfor %}
+			</div>
+		{% endif %}
+
+		{% if redirect_field_value %}
+			<input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+		{% endif %}
+		<div class="mb-2 text-center w-100 d-grid">
+			<button class="btn btn-secondary" type="submit">Iniciar Sesión</button>
+		</div>
+		<div class="mt-4 text-center">
+			<a class="text-center" style="color: #74788D; text-decoration: none" href="{% url 'account_reset_password' %}"><i class="fa-solid fa-lock fa-xs"></i>  ¿Olvidaste tu contraseña?</a>
+		</div>
+	</form>
+{% endblock main %}

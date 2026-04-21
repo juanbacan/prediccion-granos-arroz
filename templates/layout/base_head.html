@@ -1,0 +1,70 @@
+{% load static %}
+{% load pwa %}
+{% load webpush_notifications %}
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width" />
+
+    {% comment %} Verificacion de Facebook {% endcomment %}
+    {% comment %} <meta name="facebook-domain-verification" content="6eoe57s1xtul14z6qqxi0aagaaq82o" /> {% endcomment %}
+
+    {% block meta_tags %}
+        <title>{{ application.title }}{{ flatpage.title }}</title>
+        <meta name="title" content="{{ application.meta_title }}"/>
+        <meta name="description" content="{{ application.meta_description }}"/>
+    {% endblock %}
+
+    {% if application.favicon %}
+        <link rel="shortcut icon" href="{{ application.url }}{{ application.favicon.url }}">
+    {% endif %}
+    
+    <meta name="keywords" content="{{ application.key_words|default_if_none:"" }}"/>
+    <meta name="robots" content="index, follow"/>
+    <meta name="language" content="Spanish"/>
+
+    <meta property="og:site_name" content="{{ application.meta_title }}"/>
+
+    <meta property="og:type" content="website"/>
+    <meta property="og:url" content="{{ application.url }}"></meta>
+    <meta property="og:title" content="{{ application.meta_title }}"/>
+    <meta property="og:description" content="{{ application.meta_description }}"/>
+
+    {% if application.social_images %}
+        <meta property="og:image" content="{{ application.social_images.url }}"/>
+        <meta property="twitter:image" content="{{ application.social_images.url }}"/>
+    {% endif %}
+
+    <meta property="twitter:card" content="summary_large_image"/>
+    <meta property="twitter:url" content="{{ application.url }}"></meta>
+    <meta property="twitter:title" content="{{ application.meta_title }}"/>
+    <meta property="twitter:description" content="{{ application.meta_description }}"/> 
+    
+    {% block css %}
+        <link rel="stylesheet" type="text/css" href="{% static 'bootstrap/styles.css' %}"> 
+        <link rel="stylesheet" type="text/css" href="{% static 'core/assets/css/style.css' %}">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" integrity="sha512-MV7K8+y+gLIBoVD59lQIYicR65iaqukzvf/nwasF0nqhPay5w/9lJmVM2hMDcnK1OnMGCdVK+iQrJ7lzPJQd1w==" crossorigin="anonymous" referrerpolicy="no-referrer" /> 
+    {% endblock css %}
+
+    {% comment %} Google Analytics and Google Ads {% endcomment %}
+    {% comment %} {% if not request.user.premium %}
+        <script  async data-ad-client="ca-pub-4779141162178342" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    {% endif %}
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-8WTJ24R7X6"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments)}
+        gtag('js', new Date());
+        gtag('config', 'G-8WTJ24R7X6');
+    </script> {% endcomment %}
+
+    {% comment %} Webpush Notifications and PWA {% endcomment %}
+    {% if webpush_habilitado %}
+        {% webpush_header %}
+        {% progressive_web_app_meta %}
+    {% endif %}
+
+    {% comment %} Google One Tap {% endcomment %}
+    {% comment %} {% if not request.user.is_authenticated %}
+        <script src="https://accounts.google.com/gsi/client" async defer></script>
+    {% endif %} {% endcomment %}
+

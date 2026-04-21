@@ -1,0 +1,50 @@
+{% load socialaccount %}
+{% load static %}
+
+{% get_providers as socialaccount_providers %}
+
+{% for provider in socialaccount_providers %}
+{% if provider.id == "openid" %}
+{% for brand in provider.get_brands %}
+<li>
+  <a title="{{brand.name}}" 
+     class="socialaccount_provider {{provider.id}} {{brand.id}}" 
+     href="{% provider_login_url provider.id openid=brand.openid_url process=process %}"
+     >{{brand.name}}</a>
+</li>
+{% endfor %}
+
+{% endif %}
+  {% if provider.name == "Google" %}
+    <form method="POST" action="/accounts/google/login/?process=login" class="mb-3">
+      {% csrf_token %}
+      <div class="d-flex justify-content-start align-items-center" onclick="this.parentNode.submit();" style="cursor: pointer;">
+        <div class="border border-primary d-flex justify-content-center align-items-center" style="width: 50px; height: 45px;">
+          <img src="{% static 'assets/icons/google.png' %}" style="width: 18px; height: 18px;" alt="Like">
+        </div>
+        <div class="d-flex w-100 align-items-center justify-content-center" style="background-color: #4285f4; color: #fff; height: 46px;">
+          <p class="m-0">Continuar con Google</p>
+        </div>
+      </div>
+    </form>
+
+  {% elif provider.name == "Facebook" %}
+    <div>
+      <form method="POST" action="/accounts/facebook/login/?process=login" class="mb-3">
+        {% csrf_token %}
+        <div class="d-flex justify-content-start align-items-center" onclick="this.parentNode.submit();" style="cursor: pointer;">
+          <div class="border border-primary d-flex justify-content-center align-items-center" style="width: 50px; height: 45px;">
+            <img src="{% static 'icons/facebook.png' %}" style="width: 23px; height: 23px;" alt="Like">
+          </div>
+          <div class="d-flex w-100 align-items-center justify-content-center" style="background-color: #3b5998; color: #fff; height: 46px;">
+            <p class="m-0">Continuar con Facebook</p>
+          </div>
+        </div>
+      </form>
+    </div>
+  {% else %}
+      <a title="{{provider.name}}" class="socialaccount_provider {{provider.id}}" 
+        href="{% provider_login_url provider.id process=process scope=scope auth_params=auth_params %}">{{provider.name}}</a>
+  {% endif %}
+  
+{% endfor %}

@@ -1,0 +1,99 @@
+{% load core_extras %}
+
+{% include 'layout/menu.html' %}
+
+
+{% if user.is_authenticated %}
+    <div class="d-flex gap-1">
+        <div class="dropdown d-inline-block my-auto">
+            <div onclick="resetNotificaciones()" style="padding: 5px 10px!important;" type="button" class="position-relative" id="page-header-notifications-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                <i class="fa-regular fa-lg fa-bell"></i>
+                {% if num_notificaciones > 0 %}
+                    <span id="num_notificaciones" class="position-absolute translate-middle badge rounded-pill bg-danger small" style="font-size: 0.7rem;">
+                        {{ num_notificaciones }}
+                    </span>
+                {% endif %}
+            </div>
+            <div class="shadow-lg dropdown-menu dropdown-menu-lg dropdown-menu-end dropdown-custom-sm p-0"
+                aria-labelledby="page-header-notifications-dropdown">
+                <div class="p-3 shadow mb-2">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h6 class="m-0"> Notificaciones </h6>
+                        </div>
+                        <div class="col-auto">
+                            {% comment %} <a href="{% url 'authentication:notificaciones' %}" class="small"> Ver Todas</a> {% endcomment %}
+                        </div>
+                    </div>
+                </div>
+                <div data-simplebar style="max-height: 230px; overflow: auto;">
+                    {% for n in notificaciones %}
+                        <div 
+                            style="text-decoration: none; cursor: pointer" 
+                            onclick="verNotificacion('{{ n.url }}', '{{ n.id }}', '{{ n.visto }}')" 
+                            class="notificacion {% if n.visto %}notificacion-leida{% endif %} d-flex align-items-center justify-content-start gap-3 py-1 px-2"
+                        >
+                            {% if n.usuario_notifica|get_photo_user %}
+                                <img src="{{ n.usuario_notifica|get_photo_user }}" class="rounded-circle" style="width:30px; height:30px" alt="Avatar">
+                            {% else %}
+                                <div width="30" height="30">
+                                    <div class="rounded-circle d-flex justify-content-center align-items-center" style="width:30px; height:30px; background-color: #c7c7c7">
+                                        <b>{{ n.usuario_notifica|get_first_name|slice:":1" }}</b>
+                                    </div>
+                                </div>
+                            {% endif %}
+                            <div style="font-size: 13px;">
+                                {{ n.mensaje_final }}
+                                <div class="text-muted" style="font-size: 12px;">
+                                    {{ n.get_hace_tiempo_string }}
+                                </div>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="notificacion d-flex align-items-center justify-content-center gap-3 py-3 px-2">
+                            <div style="font-size: 13px;">
+                                No hay notificaciones
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="dropdown">
+            <div class="d-flex align-items-center gap-2 nav-item dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                {% if user|get_photo_user %}
+                    <img src="{{ user|get_photo_user }}" class="rounded-circle" style="width:33px; height:33px" alt="Avatar">
+                {% else %}
+                    <div class="rounded-circle d-flex justify-content-center align-items-center" style="width:33px; height:33px; background-color: #c7c7c7">
+                        <b>{{ user|get_first_name|slice:":1"|upper }}</b>
+                    </div>
+                {% endif %}
+            </div>
+            <ul class="dropdown-menu dropdown-menu-end">
+                {% comment %} <li><a class="dropdown-item" href="{% url 'authentication:my_usuario' %}" title="Perfil de Usuario {{ application.titulo_sitio }}"><i class="fa-solid fa-user"></i> Mi Perfil</a></li> {% endcomment %}
+                {% if request.user.is_superuser %}
+                    <li><a class="dropdown-item" href="{% url 'administracion' %}" title="Panel de Administración"><i class="fa-solid fa-cog"></i> Administración</a></li>
+                {% endif %}                
+                {% if request.session.volver_usuario %}
+                    {% comment %} <li><a class="dropdown-item" href="{% url 'core:api_administracion' %}?action=volver_usuario" title="Panel de Administración"><i class="fa-solid fa-arrow-right-arrow-left"></i> Regresar a mi cuenta</a></li> {% endcomment %}
+                {% endif %}
+                <li><a class="dropdown-item" href="/accounts/logout/" title="Cerrar sesión"><i class="fa-solid fa-sign-out"></i> Cerrar Sesión</a></li>
+            </ul>
+        </div>
+        <button class="btn btn-dark d-block d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#menuMobile" aria-controls="menuMobile">
+            <i class="fa-solid fa-bars-staggered"></i>
+        </button>
+    </div>
+{% else %}
+    <div class="d-flex align-items-center gap-2">
+        <div>
+            <a class="btn btn-link link3" href="/accounts/login/?next={{ request.path }}" title="Iniciar sesión plataformar {{ application.titulo_sitio }}">Entrar</a>
+        </div>
+        <div>
+            <a class="btn btn-sm btn-primary" href="/accounts/signup/?next={{ request.path }}" title="Iniciar sesión plataformar {{ application.titulo_sitio }}">Únete Gratis</a>
+        </div>
+        <button class="btn btn-dark d-block d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#menuMobile" aria-controls="menuMobile">
+            <i class="fa-solid fa-bars-staggered"></i>
+        </button>
+    </div>
+{% endif %}

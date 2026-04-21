@@ -1,0 +1,30 @@
+# Base framework
+Django>=4.2,<5.0
+
+# Proyecto core compartido
+git+https://github.com/juanbacan/django_core_app.git#egg=django-core-app
+
+# Apps Django usadas en INSTALLED_APPS
+django-autocomplete-light
+django-allauth
+django-nested-admin
+django-mptt
+django-pwa
+django-webpush
+django-tinymce
+django-social-share
+django-cropperjs
+
+# Base de datos/documentos
+psycopg2-binary
+pymongo
+
+# Datos y entrenamiento/prediccion
+numpy
+pandas
+matplotlib
+scikit-learn
+tensorflow
+keras
+joblib
+openpyxl

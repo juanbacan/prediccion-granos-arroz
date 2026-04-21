@@ -1,0 +1,34 @@
+{% load static %}
+<div class="offcanvas offcanvas-end" data-bs-scroll="true" tabindex="-1" id="menuMobile" aria-labelledby="menuMobileLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="menuMobileLabel">
+            <a class="link" href="{{ request.path }}">
+                {% if application.logo %}
+                    <img src="{{ application.logo.url }}" alt="Volver" height="40px">
+                {% endif %}
+            </a>
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <hr class="hr my-0"/>
+    <div class="offcanvas-body p-0 mt-3">
+        <div class="accordion accordion-flush" id="accordionMenuMobile">
+            <div class="accordion-item my-1">
+                <ul class="list-group list-group-flush">
+                    <a href="/" class="list-group-item link2">
+                        <div class="{% if request.path == "/" %}fw-bold text-primary{% endif %}" href="/"><i class="fa-solid fa-house"></i> Inicio</div>
+                    </a>
+                </ul>
+            </div>
+            {% if user.is_authenticated %}
+                <div class="accordion-item my-1">
+                    <ul class="list-group list-group-flush">
+                        <a href="/mi_perfil/" class="list-group-item link2">
+                            <div class="{% if request.path == "/mi_perfil/" %} fw-bold text-primary{% endif %}"><i class="fa-solid fa-user"></i> Mi Perfil</div>
+                        </a>
+                    </ul>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
