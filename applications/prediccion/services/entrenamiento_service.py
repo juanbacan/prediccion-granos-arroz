@@ -383,21 +383,31 @@ def _entrenar_objetivo(
 
     # 7. SERIALIZACIÓN (GUARDAR MODELO Y SCALER)
     modelo_bytes = io.BytesIO()
-    with tempfile.NamedTemporaryFile(suffix=".pkl", delete=True) as tmp_model:
-        joblib.dump(model, tmp_model.name)
-        tmp_model.flush()
-        tmp_model.seek(0)
-        modelo_bytes.write(tmp_model.read())
+    tmp_model_path = None
+    try:
+        with tempfile.NamedTemporaryFile(suffix=".pkl", delete=False) as tmp_model:
+            tmp_model_path = tmp_model.name
+        joblib.dump(model, tmp_model_path)
+        with open(tmp_model_path, "rb") as fh:
+            modelo_bytes.write(fh.read())
+    finally:
+        if tmp_model_path and os.path.exists(tmp_model_path):
+            os.remove(tmp_model_path)
     modelo_bytes.seek(0)
 
     scaler_bytes = None
     if scaler is not None:
         scaler_bytes = io.BytesIO()
-        with tempfile.NamedTemporaryFile(suffix=".pkl", delete=True) as tmp_scaler:
-            joblib.dump(scaler, tmp_scaler.name)
-            tmp_scaler.flush()
-            tmp_scaler.seek(0)
-            scaler_bytes.write(tmp_scaler.read())
+        tmp_scaler_path = None
+        try:
+            with tempfile.NamedTemporaryFile(suffix=".pkl", delete=False) as tmp_scaler:
+                tmp_scaler_path = tmp_scaler.name
+            joblib.dump(scaler, tmp_scaler_path)
+            with open(tmp_scaler_path, "rb") as fh:
+                scaler_bytes.write(fh.read())
+        finally:
+            if tmp_scaler_path and os.path.exists(tmp_scaler_path):
+                os.remove(tmp_scaler_path)
         scaler_bytes.seek(0)
 
     # 8. GRÁFICO (Comparamos y_real vs y_predichas por LOOCV)
